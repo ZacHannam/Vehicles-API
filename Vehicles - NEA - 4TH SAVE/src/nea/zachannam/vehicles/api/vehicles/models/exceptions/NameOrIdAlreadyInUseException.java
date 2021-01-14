@@ -1,0 +1,13 @@
+package nea.zachannam.vehicles.api.vehicles.models.exceptions;
+
+public class NameOrIdAlreadyInUseException extends Exception {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2433445303089082097L;
+	
+	public NameOrIdAlreadyInUseException() {
+		
+	}
+}

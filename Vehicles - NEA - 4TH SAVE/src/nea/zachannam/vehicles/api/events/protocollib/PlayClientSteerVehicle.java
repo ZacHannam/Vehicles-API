@@ -1,0 +1,69 @@
+package nea.zachannam.vehicles.api.events.protocollib;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+
+import nea.zachannam.vehicles.api.events.protocollib.wrappers.WrapperPlayClientSteerVehicle;
+import nea.zachannam.vehicles.api.main.VehiclesAPI;
+import nea.zachannam.vehicles.api.user.User;
+import nea.zachannam.vehicles.api.vehicles.Vehicle;
+
+public class PlayClientSteerVehicle {
+
+	public PlayClientSteerVehicle() {
+		
+		ProtocolLibrary.getProtocolManager().addPacketListener(
+				new PacketAdapter(VehiclesAPI.getPlugin(), ListenerPriority.HIGH, PacketType.Play.Client.STEER_VEHICLE) {
+					
+				@Override
+				public void onPacketReceiving(PacketEvent event) {
+					
+					if (event.getPacketType() == PacketType.Play.Client.STEER_VEHICLE) {
+						
+						if(VehiclesAPI.getUserManager().isUser(event.getPlayer().getUniqueId())) {
+							User user = VehiclesAPI.getUserManager().getUser(event.getPlayer().getUniqueId());
+							if(user.inDriverSeat()) {
+								
+								PacketContainer packet = event.getPacket();
+								WrapperPlayClientSteerVehicle wrapper = new WrapperPlayClientSteerVehicle(packet);
+								
+								Vehicle vehicle = user.getVehicle();
+								
+								if(wrapper.getForward() > 0.0) {
+									vehicle.buttonPressW();
+								} else if(wrapper.getForward() < 0.0){
+									vehicle.buttonPressS();
+								} else if(wrapper.getForward() == 0.0){
+									vehicle.noButtonPressForward();
+								}
+								
+								if(wrapper.getSideways() > 0.0) {
+									vehicle.buttonPressA();
+								} else if(wrapper.getSideways() < 0.0){
+									vehicle.buttonPressD();
+								} else if(wrapper.getSideways() == 0.0){
+									vehicle.noButtonPressSideways();
+								}
+								
+								if(wrapper.isJump()) {
+									vehicle.buttonPressSpace();
+								}
+								
+								if(wrapper.isUnmount()) {
+									vehicle.buttonPressCtrl();
+								}
+								
+							}
+						}			
+					}
+					
+				}
+					
+		});
+		
+	}
+}
