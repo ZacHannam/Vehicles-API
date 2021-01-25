@@ -6,6 +6,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
+import lombok.Getter;
+import lombok.Setter;
 import nea.zachannam.vehicles.api.utils.Point4D;
 import nea.zachannam.vehicles.api.utils.VehicleMath;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
@@ -17,7 +19,7 @@ import nea.zachannam.vehicles.api.vehicles.components.wheelbase.WheelBase;
 
 public abstract class SteeringWheelComponent extends Component implements SteeringWheel {
 	
-	// COMPONENT METHODS +
+	//-------------------------------------------------------------------- COMPONENT METHODS ------------------------------------------------------------------------
 	
 	public String getComponentName() {
 		return ComponentName.STEERING_WHEEL.getName();
@@ -25,13 +27,11 @@ public abstract class SteeringWheelComponent extends Component implements Steeri
 		
 	public String[] getRequiredComponents() {
 		return new String[] {
-				ComponentName.FRAME.getName(), ComponentName.DRIVER_SEAT.getName(),
+				ComponentName.FRAME.getName(), ComponentName.DRIVER_SEAT.getName(), ComponentName.WHEELBASE.getName(),
 		};
 	}
-		
-	// COMPONENT METHODS -
 	
-	// ABSTRACT METHODS +
+	//-------------------------------------------------------------------- ABSTRACT METHODS ------------------------------------------------------------------------
 	
 	public abstract ItemStack HELMET_ITEM();
 	public abstract int STEERINGWHEEL_LOCKS();
@@ -39,32 +39,18 @@ public abstract class SteeringWheelComponent extends Component implements Steeri
 	public abstract Vector OFFSET();
 	public abstract double YAW_OFFSET();
 	
-	// ABSTRACT METHODS -
+	//-------------------------------------------------------------------- ARMORSTAND METHODS ------------------------------------------------------------------------
 	
-	// VARIABLES +
-	
-	private Vector offset;
+	@Getter
+	@Setter
 	private EntitySteeringWheel steeringWheelEntity;
+	
+	@Getter
+	@Setter
 	private ItemStack helmetItem;
 	
-	private double steeringWheelAngle;
-	private int steeringWheelLocks = 1;
-	private double yawOffset;
-	
-	// VARIABLES -
-	
-	// COMPONENT +
-	
-	public EntitySteeringWheel getSteeringWheelEntity() {
-		return this.steeringWheelEntity;
-	}
-	
-	public void setSteeringWheelEntity(EntitySteeringWheel paramSteeringWheelEntity) {
-		this.steeringWheelEntity = paramSteeringWheelEntity;
-	}
-	
 	public ArmorStand getArmorStand() {
-		return this.steeringWheelEntity.getArmorStand();
+		return this.getSteeringWheelEntity().getArmorStand();
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -75,55 +61,9 @@ public abstract class SteeringWheelComponent extends Component implements Steeri
 		}
 	}
 	
-	public ItemStack getHelmetItem() {
-		return helmetItem;
-	}
-	
-	public void setOffset(Vector paramOffset) {
-		this.offset = paramOffset;
-	}
-	public Vector getOffset() {
-		return this.offset;
-	}
-	
-	public void setSteeringWheelAngle(double paramAngle) {
-		this.steeringWheelAngle = paramAngle;
-	}
-	
-	public double getSteeringWheelAngle() {
-		return this.steeringWheelAngle;
-	}
-	
-	public void setSteeringWheelLocks(int paramSteeringWheelLocks) {
-		this.steeringWheelLocks = paramSteeringWheelLocks;
-	}
-	
-	public int getSteeringWheelLocks() {
-		return this.steeringWheelLocks;
-	}
-	
-	public double getYawOffset() {
-		return this.yawOffset;
-	}
-	public void setYawOffset(double paramYawOffset) {
-		this.yawOffset = paramYawOffset;
-	}
-	
-	// COMPONENT -
-	
-	// METHODS +
-	
-	private void setHelmetItem(ItemStack paramItem) {
-		this.helmetItem = paramItem;
-	}
-	
 	private void move() {
 		
 		Location newLocation = VehicleMath.getVectorYawLocation(this.getVehicle().getLocation(), this.getOffset(), this.getVehicle().getLocation().getYaw());
-		
-		double height = super.getFrame().getLocation().getY();
-		
-		newLocation.setY(height + getOffset().getY());
 		
 		Location seatLocation = super.getDriverSeat().getLocation();
 		
@@ -134,56 +74,67 @@ public abstract class SteeringWheelComponent extends Component implements Steeri
 		
 		newLocation.setYaw((float) Math.toDegrees(theta));
 		
-		
 		this.getArmorStand().teleport(newLocation);
-		this.getSteeringWheel().getArmorStand().setHeadPose(new EulerAngle(0, getMappedSteeringAngle() + this.getYawOffset(), steeringWheelAngle));
+		this.getArmorStand().setHeadPose(new EulerAngle(0, this.getMappedSteeringAngle() + this.getYawOffset(), this.getSteeringWheelAngle()));
 	}
+	
+	//-------------------------------------------------------------------- STEERINGWHEEL METHODS ------------------------------------------------------------------------
+
+	@Getter
+	@Setter
+	private double steeringWheelAngle;
+	
+	@Getter
+	@Setter
+	private int steeringWheelLocks;
+	
+
 	
 	private double getMappedSteeringAngle() {
 		
 		WheelBase wheelBase = (WheelBase) getVehicle().getFirstComponentByType(ComponentName.WHEELBASE.getName());
 		
-		double wheelAngle = (wheelBase.getSteeringRotation() / wheelBase.getMaxSteeringRotation()) * (steeringWheelLocks * 180);
-		return Math.toRadians(wheelAngle);
+		return (wheelBase.getSteeringRotation() / wheelBase.getMaxSteeringRotation()) * (this.getSteeringWheelLocks() * Math.PI);
 		
 	}
 	
-	// METHODS -
+	//-------------------------------------------------------------------- SPAWNING AND DESPAWNING ------------------------------------------------------------------------
+
+	@Getter
+	@Setter
+	private Vector offset;
 	
-	// CONTROL +
+	@Getter
+	@Setter
+	private double yawOffset;
 	
-	// Spawn
 	@Override
 	public void spawn(VehicleLocation paramLocation) {
 		
-		Location location = VehicleMath.getVectorYawLocation(paramLocation, this.getOffset(), paramLocation.getYaw());
-		double height = super.getFrame().getLocation().getY();
-		location.setY(height + getOffset().getY());
+		Location spawnLocation = VehicleMath.getVectorYawLocation(paramLocation, this.getOffset(), paramLocation.getYaw());
 		
-		this.setSteeringWheelEntity(new EntitySteeringWheel(this.getVehicle(), Point4D.fromLocation(location)));
+		this.setSteeringWheelEntity(new EntitySteeringWheel(this.getVehicle(), Point4D.fromLocation(spawnLocation)));
 		this.applyHelmetItem(this.getHelmetItem());
 	}
 	
-	// Despawn
 	@Override
 	public void despawn() {
 		
-		if(this.getSteeringWheelEntity() != null) {
+		if(this.getArmorStand() != null) {
 			this.getArmorStand().remove();
 		}
 		this.setSteeringWheelEntity(null);
 		
 	}
 	
-	// Tick
+	//-------------------------------------------------------------------- TICK ------------------------------------------------------------------------
+
 	@Override
 	public void tick() {
 		this.move();
 	}
 	
-	// CONTROL -
-	
-	// MAIN +
+	//-------------------------------------------------------------------- CONSTRUCTOR ------------------------------------------------------------------------
 	
 	public SteeringWheelComponent(Vehicle paramVehicle) {
 		super(paramVehicle);
@@ -194,6 +145,4 @@ public abstract class SteeringWheelComponent extends Component implements Steeri
 		this.setSteeringWheelAngle(STEERINGWHEEL_ANGLE());
 		this.setSteeringWheelLocks(STEERINGWHEEL_LOCKS());
 	}
-	
-	// MAIN -
 }

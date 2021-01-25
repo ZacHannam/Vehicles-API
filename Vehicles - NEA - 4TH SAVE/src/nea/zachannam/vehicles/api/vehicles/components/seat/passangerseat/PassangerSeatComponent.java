@@ -6,36 +6,17 @@ import nea.zachannam.vehicles.api.vehicles.components.seat.SeatComponent;
 
 public abstract class PassangerSeatComponent extends SeatComponent {
 	
-	// COMPONENT METHODS +
+	//-------------------------------------------------------------------- COMPOONENT METHODS ------------------------------------------------------------------------
+	
 	
 	@Override
 	public String getComponentName() {
 		return ComponentName.PASSANGER_SEAT.getName();
 	}
-	
-	// COMPONENT METHODS -
-	
-	// ABSTRACT METHODS + 
-	// ABSTRACT METHODS -
-	
-	// VARIABLES +
-	// VARIABLES -
-	
-	// COMPONENT +
-	// COMPONENT -
-	
-	// METHODS +
-	// METHODS -
-	
-	// CONTROL +
-	// CONTROL -
-	
-	// MAIN +
+
+	//-------------------------------------------------------------------- CONSTRUCTOR ------------------------------------------------------------------------
 	
 	public PassangerSeatComponent(Vehicle paramVehicle) {
 		super(paramVehicle);
 	}
-	
-	// MAIN -
-
 }

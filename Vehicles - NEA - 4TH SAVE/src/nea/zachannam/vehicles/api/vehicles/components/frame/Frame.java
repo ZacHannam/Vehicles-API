@@ -12,7 +12,6 @@ public interface Frame {
 	
 	public EntityFrame getFrameEntity();
 	public void setFrameEntity(EntityFrame paramFrameEntity);
-	public ArmorStand getArmorStand();
 	public void applyHelmetItem(ItemStack paramItem);
 	public ItemStack getHelmetItem();
 	public double getLongestBodyLength();
@@ -31,5 +30,9 @@ public interface Frame {
 	
 	default Location getLocation() {
 		return this.getArmorStand().getLocation();
+	}
+	
+	default ArmorStand getArmorStand() {
+		return this.getFrameEntity().getArmorStand();
 	}
 }

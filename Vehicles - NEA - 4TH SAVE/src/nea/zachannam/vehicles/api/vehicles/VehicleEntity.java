@@ -24,21 +24,6 @@ public class VehicleEntity extends EntityArmorStand {
 	@Getter
 	private static HashMap<UUID, UUID> vehicleEntities = new HashMap<UUID, UUID>();
 	
-	//-------------------------------------------------------------------- Constructor ------------------------------------------------------------------------
-
-	// Constructor
-	public VehicleEntity(Vehicle paramVehicle, Point4D paramLocation) {
-		super(((CraftWorld) paramLocation.getWorld()).getHandle(), paramLocation.getX(), paramLocation.getY(), paramLocation.getZ());
-		((CraftWorld) paramLocation.getWorld()).getHandle().addEntity(this); // spawns in the custom entity
-		
-		setParentVehicle(paramVehicle); // sets the parent vehicle to the vehicle which it is attached to
-		
-		super.setMarker(false); // sets the armorstand to not be a marker
-		super.setInvisible(true); // makes the armorstand invisible
-		
-		addVehicleEntity(this); // adds the entity to the vehicleEntities
-	}
-	
 	//-------------------------------------------------------------------- METHODS ------------------------------------------------------------------------
 
 	/**
@@ -101,5 +86,20 @@ public class VehicleEntity extends EntityArmorStand {
 	public void die() {
 		removeVehicleEntity(this.getUniqueID()); // removes the vehicle entity
 		super.die(); // calls the parent's die procedure
+	}
+	
+	//-------------------------------------------------------------------- Constructor ------------------------------------------------------------------------
+
+	// Constructor
+	public VehicleEntity(Vehicle paramVehicle, Point4D paramLocation) {
+		super(((CraftWorld) paramLocation.getWorld()).getHandle(), paramLocation.getX(), paramLocation.getY(), paramLocation.getZ());
+		((CraftWorld) paramLocation.getWorld()).getHandle().addEntity(this); // spawns in the custom entity
+		
+		setParentVehicle(paramVehicle); // sets the parent vehicle to the vehicle which it is attached to
+		
+		super.setMarker(false); // sets the armorstand to not be a marker
+		super.setInvisible(true); // makes the armorstand invisible
+		
+		addVehicleEntity(this); // adds the entity to the vehicleEntities
 	}
 }

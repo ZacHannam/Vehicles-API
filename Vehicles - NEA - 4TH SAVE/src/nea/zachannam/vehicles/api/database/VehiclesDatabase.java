@@ -4,8 +4,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.bukkit.Bukkit;
-
+import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
 
 public class VehiclesDatabase extends Database{
@@ -27,7 +26,7 @@ public class VehiclesDatabase extends Database{
 			
 			if(!tables.next()) {
 				
-				this.executeUpdate("CREATE TABLE " + TABLE_NAME + " (vehicleUUID char(32), type int, meta String)");
+				this.executeUpdate("CREATE TABLE " + TABLE_NAME + " (vehicleUUID String, type int, meta String);");
 				
 			}
 		} catch (SQLException e) {
@@ -37,7 +36,39 @@ public class VehiclesDatabase extends Database{
 	}
 
 	public void saveVehicle(Vehicle paramVehicle) {
+		
 		String meta = paramVehicle.getMeta().toString();
-		Bukkit.broadcastMessage(meta);
+		
+		ResultSet query = this.executeQuery("SELECT * FROM " + TABLE_NAME + " WHERE vehicleUUID == '" + paramVehicle.getUuid().toString()  + "';");
+		
+		try {
+			if(query != null && query.next()) {
+				this.executeUpdate("UPDATE vehicles SET meta = '" + meta + "' WHERE vehicleUUID == '" + paramVehicle.getUuid().toString()  + "';");
+			} else {
+				this.executeUpdate("INSERT INTO vehicles (vehicleUUID, type, meta) VALUES ('" +
+			paramVehicle.getUuid() + "', " + paramVehicle.getTypeID() + ", '" + meta + "');");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void loadAllWithID(int paramID) {
+		
+		ResultSet query = this.executeQuery("SELECT * FROM " + TABLE_NAME + " WHERE type == " + String.valueOf(paramID) + ";");
+		
+		try {
+			while(query.next()) {
+				VehiclesAPI.getVehicleManager().createFromDatabaseQuery(query.getString("vehicleUUID"), query.getInt("type"), query.getString("meta"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void halt() {
+		super.halt();
 	}
 }

@@ -25,9 +25,11 @@ public class EntityDismount implements Listener {
 		
 		if(event.isCancelled()) return; // checks if the event is cancelled
 		if(event.getEntity() instanceof Player) { // checks if entity is a player
-			User user = VehiclesAPI.getUserManager().getUser(event.getEntity().getUniqueId()); // gets the user from the UserManager
-			if(user.getSeat() != null) { // checks if the user is in a seat, however also checks that the seat is not null
-				user.dismount(); // dismounts  the user from the seat
+			if(VehiclesAPI.getUserManager().isUser(event.getEntity().getUniqueId())) { // must check as player may have left
+				User user = VehiclesAPI.getUserManager().getUser(event.getEntity().getUniqueId()); // gets the user from the UserManager
+				if(user.getSeat() != null) { // checks if the user is in a seat, however also checks that the seat is not null
+					user.dismount(); // dismounts  the user from the seat
+				}
 			}
 		}
 	}

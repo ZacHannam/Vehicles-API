@@ -46,6 +46,14 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 	@Setter
 	private UUID uuid; // stores the UUID of the vehicle
 	
+	@Getter
+	@Setter
+	public int typeID; // stores the vehicles type id.
+	
+	@Getter
+	@Setter
+	private boolean hidden; // when chunk is loaded it is false and when chunk is unloaded it is false
+	
 	//-------------------------------------------------------------------- COMPONENTS IN VEHICLE ------------------------------------------------------------------------
 	/**
 	 * 
@@ -125,37 +133,13 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 		
 		setLocation(spawnLocation); // sets the location of the vehicle
 		
-		for(Component component : components) { // runs through each of the components in the vehicle
-			component.spawn(spawnLocation); // spawns the component
-		}
-		
 		setSpawned(true); // sets spawned to true
 		
-		setTaskID(new BukkitRunnable() { // creates a new Bukkit Runnable and sets the taskID to the taskID of the Runnable
-
-			@Override
-			public void run() {
-				
-				if(!isSpawned()) { // checks if the vehicle is spawned
-					this.cancel();// if the vehicle is not spawned then it end the runnable
-					return; // returns from the function
-				}
-				
-				for(Component component : components) { // runs through each of the components
-					
-					if(!isDriver()) { // if there is no driver then it will call the noButtonPressForward and noButtonPressSideways
-						noButtonPressForward();
-						noButtonPressSideways();
-					}
-					
-					
-					component.tick(); // calls the tick function for each component
-				}
-				
-			}
-			
-		}.runTaskTimer(VehiclesAPI.getPlugin(), 1, 1).getTaskId()); // runs the task every tick
-		
+		if(VehiclesAPI.getChunkManager().isChunkLoaded(spawnLocation.toLocation())) {
+			this.show();
+		} else {
+			VehiclesAPI.getChunkManager().addVehicleToBuffer(this);
+		}
 	}
 	
 	/**
@@ -163,13 +147,11 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 	 */
 	public void despawn() {
 		
-		setSpawned(false); // sets spawned to false
-		
-		Bukkit.getScheduler().cancelTask(taskID); // cancels the repeating task
-		
-		for(Component component : components) {	// runs through each component in the vehicle
-			component.despawn(); // despawns the component
+		if(!this.isHidden()) {
+			this.hide();
 		}
+		
+		setSpawned(false); // sets spawned to false
 	}
 	
 	/**
@@ -231,49 +213,115 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 		
 		JSONObject meta = new JSONObject(); // creates a new meta jsonobject
 		meta.put("spawned", isSpawned()); // spawned to isspawned
-		meta.put("location", getLocation()); // sets location to getLocation
+		if(getLocation() != null) {
+			meta.put("location", getLocation().toLocation().serialize()); // sets location to getLocation
+		}
 		
 		return meta; // returns the meta object
 	}
 	
 	/**
-	 * Gets the meta for the vehicle
+	 * Gets all of the meta for the vehicle
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public JSONObject getMeta() {
-		JSONObject meta = new JSONObject();
-		JSONObject componentsJSON = new JSONObject();
-		for(Component component : this.getComponents()) {
-			if(componentsJSON.containsKey(component.getComponentName())) continue;
-			List<Component> components = this.getComponentByType(component.getComponentName());
-			JSONObject[] componentsMeta = new JSONObject[components.size()];
-			for(int componentIndex = 0; componentIndex < components.size(); componentIndex++) {
-				componentsMeta[componentIndex]=components.get(componentIndex).getMeta();
+		JSONObject meta = new JSONObject(); // creates a new JSONObject that will store all of the vehicles meta
+		JSONObject componentsJSON = new JSONObject(); // creates a new JSONObject that will store all of the components meta
+		for(Component component : this.getComponents()) { // iterates through each component in the vehicle
+			if(componentsJSON.containsKey(component.getComponentName())) continue; // checks if another component with the same type, has already been added to component meta, if so that component can be skipped, as components are stored in lists
+			List<Component> components = this.getComponentByType(component.getComponentName()); // gets all of the components in the vehicle, that are of the same component type as our current iteration, including iteself.
+			List<JSONObject> componentsMeta = new ArrayList<JSONObject>(); // creates a new JSONObject that will store all of the components type meta
+			for(int componentIndex = 0; componentIndex < components.size(); componentIndex++) { // index is from 0 to the number of the components in the vehicle that are of component type
+				componentsMeta.add(components.get(componentIndex).getMeta()); // adds the meta of that component into components type JSONObject
 			}
 			
-			componentsJSON.put(component.getComponentName(), componentsMeta);
+			componentsJSON.put(component.getComponentName(), componentsMeta); // after going through each component of component type, adds the JSONArray to the JSONObject with the key of the component type
 		}
-		meta.put("components", componentsJSON);
-		meta.put("vehicle", getVehicleMeta());
+		// FINAL componentsJSON {INVENTORY:{[null]}, WHEELS:{[..., ..., ..., ...]}}
+		meta.put("vehicle", getVehicleMeta()); // Retrieves the vehicles own meta and puts it into the meta JSONObject
+		meta.put("components", componentsJSON); // puts the component meta into the meta JSONObject.
 		
-		return meta;
+		return meta; // returns all of the vehicles meta
+	}
+	
+	//-------------------------------------------------------------------- SHOW AND HIDE ------------------------------------------------------------------------
+
+	/**
+	 * Called the show the vehicle only when the chunk the vehicle is in is active, if it is called and the chunk is not active, then the vehicle will appear broken (STUPID MINECRAFT!)
+	 */
+	public void show() {
+
+		if(!this.isSpawned() || !this.isHidden()) return; // if the vehicle is not spawned then it will return, as the vehicle should not be shown. Also checks if the vehicle is shown, if it is shown then if shown again, will cause problems.
+		
+		for(Component component : components) { // runs through each of the components in the vehicle
+			component.spawn(this.getLocation()); // spawns the component
+		}
+		
+		setTaskID(new BukkitRunnable() { // creates a new Bukkit Runnable and sets the taskID to the taskID of the Runnable
+
+			@Override
+			public void run() {
+				
+				if(!isSpawned()) { // checks if the vehicle is spawned
+					this.cancel();// if the vehicle is not spawned then it end the runnable
+					return; // returns from the function
+				}
+				
+				for(Component component : components) { // runs through each of the components
+					
+					if(!isDriver()) { // if there is no driver then it will call the noButtonPressForward and noButtonPressSideways
+						noButtonPressForward();
+						noButtonPressSideways();
+					}
+					
+					
+					component.tick(); // calls the tick function for each component
+				}
+				
+			}
+			
+		}.runTaskTimer(VehiclesAPI.getPlugin(), 1, 1).getTaskId()); // runs the task every tick
+		
+		this.setHidden(false); // sets the vehicle to have the shown flag.
+	}
+	
+	/**
+	 * Called to hide the vehicle when the Vehicle is nolonger in an active chunk.
+	 * Stops lag and duplicate vehicles from spawning
+	 */
+	public void hide() {
+		
+		if(!this.isSpawned()|| this.isHidden()) return; // if the vehicle is not spawned then it cannot be hidden. Also checks if the vehicle is already hidden, if the vehicle is already hidden, then errors may occur.
+		
+		Bukkit.getScheduler().cancelTask(taskID); // cancels the repeating tick task
+		
+		for(Component component : components) {	// runs through each component in the vehicle
+			component.despawn(); // despawns the component
+		}
+		
+		this.setHidden(true); // sets the vehicle to have the hidden flag.
 	}
 	
 	//-------------------------------------------------------------------- CONSTRUCTOR AND HALT ------------------------------------------------------------------------
 	
 	// CONSTRUCTOR
-	public Vehicle(UUID paramUUID) {
+	public Vehicle(UUID paramUUID, int paramTypeID) {
 		this.setUuid(paramUUID); // sets UUID to paramUUID
+		this.setTypeID(paramTypeID);
 		
-		setBuilt(false); // sets built to false
-		setSpawned(false); // sets spawned to false
+		this.setBuilt(false); // sets built to false
+		this.setSpawned(false); // sets spawned to false
 	}
 	
 	/**
 	 * Halts the vehicle
 	 */
 	public void halt() {
+		this.haltComponents();
 		VehiclesAPI.getVehiclesDatabase().saveVehicle(this); // saves the vehicle's data
+		if(this.isSpawned()) { // checks if the vehicle is spawned
+			this.despawn(); // despawns the vehicle
+		}
 	}
 }

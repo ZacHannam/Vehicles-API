@@ -28,6 +28,7 @@ public final class User {
 	private static final long DEBOUNCE_TIME = 3; // debounce time in ticks (20 ticks / second)
 	
 	@Getter
+	@Setter
 	private boolean inDebounce; // in debounce
 	
 	/**
@@ -35,14 +36,14 @@ public final class User {
 	 */
 	public void addDebounce() {
 		
-		this.inDebounce = true; // sets debounce to true
+		this.setInDebounce(true); // sets debounce to true
 		
 		// bukkit runnable (performs everything a set time later)
 		new BukkitRunnable() { 
 
 			@Override 
 			public void run() { // will perform DEBOUNCE_TIME later
-				inDebounce = false; // sets debounce to false
+				setInDebounce(true); // sets debounce to false
 			}
 			
 		}.runTaskLater(VehiclesAPI.getPlugin(), DEBOUNCE_TIME);
@@ -81,7 +82,6 @@ public final class User {
 	public void dismount() {
 		if(this.getSeat() != null) { // checks if the seat is not null
 			this.getSeat().ejectRider(); // ejects the ride from the seat
-			this.getPlayer().teleport(this.getVehicle().getLocation().toLocation().add(0, 1, 0)); // changes the players location so they dont fall through the world when dismounting from a vehicle
 			this.setSeat(null); // sets the seat to be null		
 		}
 	}

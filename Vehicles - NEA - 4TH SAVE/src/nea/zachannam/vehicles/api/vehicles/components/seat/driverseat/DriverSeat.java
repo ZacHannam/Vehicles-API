@@ -5,7 +5,7 @@ import nea.zachannam.vehicles.api.vehicles.components.seat.Seat;
 public interface DriverSeat extends Seat {
 
 	public void setShowSteeringDisplay(boolean paramShowSteeringDisplay);
-	public boolean getShowSteeringDisplay();
+	public boolean isShowSteeringDisplay();
 	public void setNumberOfCharactersOnDisplay(int paramNumberOfCharacters);
 	public int getNumberOfCharactersOnDisplay();
 	public void setMaxSteeringAngle(float paramMaxSteeringAngle);

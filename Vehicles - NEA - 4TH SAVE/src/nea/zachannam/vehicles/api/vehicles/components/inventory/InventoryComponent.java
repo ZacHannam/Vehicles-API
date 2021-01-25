@@ -1,5 +1,10 @@
 package nea.zachannam.vehicles.api.vehicles.components.inventory;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,17 +29,93 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 	@Getter
 	private org.bukkit.inventory.Inventory inventory;
 	
+	private static final int SIZE = 27;
+	private static final String NAME = ChatColor.BLUE + "Vehicle";
+	
+	@SuppressWarnings("unchecked")
+	private JSONObject toJSON(Map<String, Object> paramMap) {
+		JSONObject meta = new JSONObject();
+		for(Entry<String, Object> entry : paramMap.entrySet()) {
+			if(entry.getValue() instanceof Map) {
+				meta.put(entry.getKey(), toJSON((Map<String, Object>) entry.getValue()));
+			} else if(entry.getValue() instanceof String || entry.getValue() instanceof Integer) {
+				meta.put(entry.getKey(), entry.getValue());
+			}
+		}
+		return meta;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public JSONObject getMeta() {
+		if(this.getInventory() == null) return null;
+		
 		JSONObject inventoryMeta = new JSONObject();
+		inventoryMeta.put("SIZE", SIZE);
+		inventoryMeta.put("NAME", NAME);
+		
+		JSONObject inventorySlotMeta = new JSONObject();
 		
 		for(int slot = 0; slot < this.getInventory().getSize(); slot++) {
 			if(this.getInventory().getItem(slot) != null) {
-				inventoryMeta.put(slot, this.getInventory().getItem(slot).serialize());
+				
+				JSONObject itemInfo = new JSONObject();
+				
+				itemInfo.put("ITEM", toJSON(this.getInventory().getItem(slot).serialize()));
+				itemInfo.put("META", toJSON(this.getInventory().getItem(slot).getItemMeta().serialize()));
+				
+				inventorySlotMeta.put(slot, itemInfo);
 			}
 		}
 		
+		inventoryMeta.put("INVENTORY_SLOTS", inventorySlotMeta);
 		return inventoryMeta;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void buildFromMeta(JSONObject paramMeta) {
+		
+		try {
+			
+			org.bukkit.inventory.Inventory inventory = Bukkit.createInventory(null, SIZE, (String) paramMeta.get("NAME"));
+			
+			for(Object itemSlotObj : ((JSONObject) paramMeta.get("INVENTORY_SLOTS")).keySet()) {
+				JSONObject itemInfoJson = (JSONObject) ((JSONObject) paramMeta.get("INVENTORY_SLOTS")).get(itemSlotObj);
+				JSONObject itemJson = (JSONObject) itemInfoJson.get("ITEM");
+				JSONObject metaJson = (JSONObject) itemInfoJson.get("META");
+				
+				Map<String, Object> seralizedItem = new HashMap<String, Object>();
+				itemJson.forEach((k, v) -> seralizedItem.put((String) k, v));
+				
+				Map<String, Object> seralizedMeta = new HashMap<String, Object>();
+				metaJson.forEach((k, v) -> seralizedMeta.put((String) k, v));
+				
+				ItemStack itemStack = ItemStack.deserialize(seralizedItem);
+				
+				ItemMeta itemMeta = null;
+				
+				try {
+					Class[] craftMetaItemClasses = Class.forName("org.bukkit.craftbukkit.v1_16_R1.inventory.CraftMetaItem").getDeclaredClasses();
+					
+					for (Class craftMetaItemClass : craftMetaItemClasses) {
+						if(!craftMetaItemClass.getSimpleName().equals("SerializableMeta")) continue;
+						
+						Method deserialize = craftMetaItemClass.getMethod("deserialize", Map.class);
+						itemMeta = (ItemMeta) deserialize.invoke(null, seralizedMeta);
+						
+					}
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				
+				itemStack.setItemMeta(itemMeta);
+				
+				
+				inventory.setItem(Integer.valueOf((String) itemSlotObj), itemStack);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void onVehicleClick(Player paramPlayer) {
@@ -80,7 +161,7 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 	
 	private void buildInventory() {
 		
-		org.bukkit.inventory.Inventory inventory = Bukkit.createInventory(null, 3*9, ChatColor.BLUE + "Vehicle");
+		org.bukkit.inventory.Inventory inventory = Bukkit.createInventory(null, SIZE, NAME);
 		
 		ItemStack fillerItem = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta fillerItemMeta = fillerItem.getItemMeta();

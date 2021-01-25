@@ -2,6 +2,7 @@ package nea.zachannam.vehicles.api.vehicles;
 
 import java.util.ArrayList;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import nea.zachannam.vehicles.api.vehicles.components.Component;
@@ -117,12 +118,22 @@ public interface ComponentBasedVehicle {
 	}
 	
 	/**
-	 * Calls onDriverDismount on all of the components
+	 * Calls onDismount on all of the components
 	 * @param
 	 */
-	default public void onDriverDismount(Player paramRider) {
+	default public void onDismount(OfflinePlayer paramRider) {
 		for(Component component : getComponents()) {
-			component.onDriverDismount(paramRider);
+			component.onDismount(paramRider);
+		}
+	}
+	
+	/**
+	 * Calls onMount on all of the components
+	 * @param paramPlayer
+	 */
+	public default void onMount(Player paramRider) {
+		for(Component component : getComponents()) {
+			component.onMount(paramRider);
 		}
 	}
 }

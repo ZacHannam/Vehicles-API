@@ -1,8 +1,10 @@
 package nea.zachannam.vehicles.api.main;
 
+import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import nea.zachannam.vehicles.api.chunk.ChunkManager;
 import nea.zachannam.vehicles.api.commands.CommandManager;
 import nea.zachannam.vehicles.api.database.VehiclesDatabase;
 import nea.zachannam.vehicles.api.events.EventManager;
@@ -18,6 +20,7 @@ public class VehiclesAPI extends JavaPlugin {
 	private static EventManager eventManager;
 	private static CommandManager commandManager;
 	private static VehiclesDatabase vehiclesDatabase;
+	private static ChunkManager chunkManager;
 	
 	public static VehiclesDatabase getVehiclesDatabase() {
 		return vehiclesDatabase;
@@ -42,14 +45,19 @@ public class VehiclesAPI extends JavaPlugin {
 	public static CommandManager getCommandManager() {
 		return commandManager;
 	}
+	
+	public static ChunkManager getChunkManager() {
+		return chunkManager;
+	}
 
 	public void onEnable() {
 	
 		plugin = this;
 		eventManager = new EventManager();
+		chunkManager = new ChunkManager();
 		vehicleManager = new VehicleManager();
 		userManager = new UserManager();
-		commandManager = new CommandManager();
+		commandManager = new CommandManager();	
 		vehiclesDatabase = new VehiclesDatabase();
 		
 		VehicleType.loadAllVehicles();
@@ -59,10 +67,17 @@ public class VehiclesAPI extends JavaPlugin {
 	public void onDisable() {
 		
 		vehicleManager.halt();
+		vehiclesDatabase.halt();
 		userManager.halt();
 		commandManager.halt();
 		eventManager.halt();
-		vehiclesDatabase.halt();
+		chunkManager.halt();
 		
+		
+	}
+
+	public static boolean isChunkLaoded(Location location) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

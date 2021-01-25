@@ -1,7 +1,5 @@
 package nea.zachannam.vehicles.api.vehicles.components.wheelbase;
 
-import java.util.List;
-
 import org.bukkit.util.Vector;
 
 import nea.zachannam.vehicles.api.vehicles.VehicleLocation;
@@ -25,5 +23,4 @@ public interface WheelBase {
 	public double getSurfaceFriction();
 	public double getWidth();
 	public double getLength();
-	public List<Wheel> getWheels();
 }

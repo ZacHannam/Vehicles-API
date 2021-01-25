@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import nea.zachannam.vehicles.api.events.VehicleEvent;
@@ -27,6 +28,8 @@ public class PlayerInteract implements Listener   {
 	 */
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
+		if(event.getAction() != Action.RIGHT_CLICK_AIR) return; // checks if the play right clicks the block
+		
 		VehicleEvent vehicleEvent = new VehicleEvent((Event) event); // logs event
 		
 		if(vehicleEvent.getUser().isInDebounce()) return; // checks if the user is currently in a debounce (clicked in the past 3 ticks) and returns in they are

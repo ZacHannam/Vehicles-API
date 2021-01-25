@@ -13,6 +13,8 @@ import nea.zachannam.vehicles.api.events.player.PlayerInteractAtEntity;
 import nea.zachannam.vehicles.api.events.player.PlayerJoin;
 import nea.zachannam.vehicles.api.events.player.PlayerQuit;
 import nea.zachannam.vehicles.api.events.protocollib.PlayClientSteerVehicle;
+import nea.zachannam.vehicles.api.events.server.ChunkLoad;
+import nea.zachannam.vehicles.api.events.server.ChunkUnload;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 
 class ProtocolLibEventManager {
@@ -37,6 +39,8 @@ public class EventManager {
 		Plugin plugin = VehiclesAPI.getPlugin();
 		PluginManager pluginManager = Bukkit.getPluginManager();
 		
+		pluginManager.registerEvents(new ChunkLoad(), plugin);
+		pluginManager.registerEvents(new ChunkUnload(), plugin);
 		pluginManager.registerEvents(new PlayerJoin(), plugin);
 		pluginManager.registerEvents(new PlayerQuit(), plugin);
 		pluginManager.registerEvents(new EntityDismount(), plugin);

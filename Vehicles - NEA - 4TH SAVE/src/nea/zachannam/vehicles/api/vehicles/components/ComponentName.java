@@ -15,8 +15,12 @@ public enum ComponentName {
 	
 	@Getter
 	@Setter
-	String name;
+	String name; // stores the unique name for each Component Type
 	
+	/**
+	 * Used as a final for all Component Names used inside of the API. All reference unique strings to allow the API to work.
+	 * @param paramName
+	 */
 	ComponentName(String paramName){
 		this.setName(paramName);
 	}

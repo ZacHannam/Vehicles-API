@@ -58,35 +58,29 @@ class Frame_Kart_1 extends FrameComponent {
 
 	@Override
 	public double HEIGHT() {
-		// TODO Auto-generated method stub
 		return 2;
 	}
 
 	@Override
 	public double WIDTH() {
-		// TODO Auto-generated method stub
 		return 1;
 	}
 
 	@Override
 	public double LENGTH() {
-		// TODO Auto-generated method stub
 		return 2;
 	}
 
 	@Override
 	public double YAW_OFFSET() {
-		// TODO Auto-generated method stub
 		return Math.PI;
 	}
-	
 }
 
 class DriverSeat_Kart_1 extends DriverSeatComponent {
 
 	public DriverSeat_Kart_1(Vehicle paramVehicle) {
 		super(paramVehicle);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -142,7 +136,7 @@ class SteeringWheel_Kart_1 extends SteeringWheelComponent {
 	
 	@Override
 	public Vector OFFSET() {
-		return new Vector (0, 0.55, -0.5);
+		return new Vector (0, -0.55, -0.5);
 	}
 	
 	@Override
@@ -157,7 +151,6 @@ class SteeringWheel_Kart_1 extends SteeringWheelComponent {
 
 	@Override
 	public double STEERINGWHEEL_ANGLE() {
-		// TODO Auto-generated method stub
 		return Math.toRadians(42);
 	}
 
@@ -167,16 +160,15 @@ class WheelBase_Kart_1 extends WheelBaseComponent {
 
 	public WheelBase_Kart_1(Vehicle paramVehicle) {
 		super(paramVehicle);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Vector[] WHEEL_OFFSETS() {
 		return new Vector[] {
-				new Vector(1, 0, 0.5),
-				new Vector(1, 0, -0.5),
-				new Vector(-1, 0, -0.5),
-				new Vector(-1, 0, 0.5)
+				new Vector(0.5, 0, 1),
+				new Vector(-0.5, 0, 1),
+				new Vector(0.5, 0, -1),
+				new Vector(-0.5, 0, -1)
 			};
 	}
 
@@ -192,13 +184,11 @@ class WheelBase_Kart_1 extends WheelBaseComponent {
 
 	@Override
 	public float MAX_STEERING_ROTATION() {
-		// TODO Auto-generated method stub
 		return (float) (Math.PI / 6);
 	}
 
 	@Override
 	public float STEERING_SPEED() {
-		// TODO Auto-generated method stub
 		return (float) (Math.PI / 90);
 	}
 
@@ -209,19 +199,16 @@ class WheelBase_Kart_1 extends WheelBaseComponent {
 
 	@Override
 	public double POWER_ACCELERATION() {
-		// TODO Auto-generated method stub
 		return 0.004;
 	}
 
 	@Override
 	public double IDLE_ACCELERATION() {
-		// TODO Auto-generated method stub
 		return 0.001;
 	}
 
 	@Override
 	public double BRAKE_ACCELERATION() {
-		// TODO Auto-generated method stub
 		return 0.012;
 	}
 }
@@ -230,15 +217,14 @@ class Inventory_Kart_1 extends InventoryComponent {
 
 	public Inventory_Kart_1(Vehicle paramVehicle) {
 		super(paramVehicle);
-		// TODO Auto-generated constructor stub
 	}
 }
 
 
 public class Kart_1 extends Vehicle {
 
-	public Kart_1(UUID paramUUID) {
-		super(paramUUID);
+	public Kart_1(UUID paramUUID, int paramTypeID) {
+		super(paramUUID, paramTypeID);
 		
 		super.addComponent(new WheelBase_Kart_1(this));
 		super.addComponent(new DriverSeat_Kart_1(this));
