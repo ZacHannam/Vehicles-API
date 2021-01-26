@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
 
 import lombok.Getter;
 import lombok.Setter;
-import nea.zachannam.vehicles.api.main.MessagesEnum;
+import nea.zachannam.vehicles.api.enums.Messages;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.user.User;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
@@ -167,12 +167,12 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 		if(event.getRawSlot() == 13) {
 			
 			if(user.inSeat()) {
-				MessagesEnum.USER_IN_SEAT.sendMessage(user.getPlayer());
+				Messages.USER_IN_SEAT.sendMessage(user.getPlayer());
 				return;
 			}
 			
 			if(this.getDriverSeat().hasRider()) {
-				MessagesEnum.SEAT_OCCUPIED.sendMessage(user.getPlayer());
+				Messages.SEAT_OCCUPIED.sendMessage(user.getPlayer());
 				return;
 			}
 			

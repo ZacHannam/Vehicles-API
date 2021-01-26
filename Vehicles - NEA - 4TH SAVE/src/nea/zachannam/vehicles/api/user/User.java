@@ -7,7 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import lombok.Getter;
 import lombok.Setter;
-import nea.zachannam.vehicles.api.main.MessagesEnum;
+import nea.zachannam.vehicles.api.enums.Messages;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
 import nea.zachannam.vehicles.api.vehicles.components.ComponentName;
@@ -105,7 +105,7 @@ public final class User {
 	public void quickSetDrive(Vehicle paramVehicle) {
 
 		if(this.inSeat()) { // checks if player is in seat
-			MessagesEnum.USER_IN_SEAT.sendMessage(this.getPlayer()); // sends them a message if they are already in a seat
+			Messages.USER_IN_SEAT.sendMessage(this.getPlayer()); // sends them a message if they are already in a seat
 			return;
 		}
 
@@ -117,7 +117,7 @@ public final class User {
 			this.setSeat((DriverSeat) seatComponent); // sets the player in the seat whilst returning the seat they are in then sets the seat to be equal to the driver's seat
 
 		} catch (SeatOccupiedException e) {
-			MessagesEnum.SEAT_OCCUPIED.sendMessage(this.getPlayer()); // if there is already a driver then it will stop and send them a message
+			Messages.SEAT_OCCUPIED.sendMessage(this.getPlayer()); // if there is already a driver then it will stop and send them a message
 		}
 
 	}

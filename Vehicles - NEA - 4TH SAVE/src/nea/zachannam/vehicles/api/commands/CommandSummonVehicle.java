@@ -9,8 +9,8 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import nea.zachannam.vehicles.api.main.MessagesEnum;
-import nea.zachannam.vehicles.api.main.PermissionsEnum;
+import nea.zachannam.vehicles.api.enums.Messages;
+import nea.zachannam.vehicles.api.enums.Permissions;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
 import nea.zachannam.vehicles.api.vehicles.VehicleLocation;
@@ -50,9 +50,9 @@ public class CommandSummonVehicle extends VehicleCommand {
 			Player player = (Player) sender; // casts the sender to a player
 			
 			// checks if the player has the permission to summon the vehicle
-			if(!PermissionsEnum.COMMAND_SUMMON_VEHICLE.hasPermission(player)) {
+			if(!Permissions.COMMAND_SUMMON_VEHICLE.hasPermission(player)) {
 				// if they do not then it will send them the invalid permission message
-				MessagesEnum.INVALID_PERMISSION.sendMessage(player);
+				Messages.INVALID_PERMISSION.sendMessage(player);
 				return true; // breaks (returns true)
 			}
 			
@@ -64,7 +64,7 @@ public class CommandSummonVehicle extends VehicleCommand {
 			 */
 			if(args.length == 0) { // checks if there are 0 arguments
 				// if there are 0 arguments then it will not know which vehicle to spawn
-				MessagesEnum.COMMAND_SUMMON_VEHICLE_USAGE.sendMessage(player); // sends the usage to the player
+				Messages.COMMAND_SUMMON_VEHICLE_USAGE.sendMessage(player); // sends the usage to the player
 				return true; // breaks
 			}
 			
@@ -77,7 +77,7 @@ public class CommandSummonVehicle extends VehicleCommand {
 			
 			// as the sender will not have a location as it is not a player we cannot spawn it at the sender's feet therefore it must have a location provided
 			if(args.length != 5) { // check to see if there are 5 arguments
-				MessagesEnum.COMMAND_SUMMON_VEHICLE_USAGE.sendMessageToCommandSender(sender); // sends the usage to the console
+				Messages.COMMAND_SUMMON_VEHICLE_USAGE.sendCommandSender(sender); // sends the usage to the console
 				return true; // breaks
 			}
 		}
@@ -87,10 +87,15 @@ public class CommandSummonVehicle extends VehicleCommand {
 		
 		// grabs the vehicle type from the argument 0
 		// possible error: argument out of bounds: checked args.length and it is atleast 1
-		VehicleType vehicleType = VehicleType.getVehicleType(args[0]);
-		if(vehicleType == null) { // if we get a response of null then we know the vehicle does not exists
-			MessagesEnum.INVALID_VEHICLE.sendMessageToCommandSender(sender); // sends the sender a message to tell them their input was rejected
-			return true; // break
+		VehicleType vehicleType;
+		try{
+			vehicleType = VehicleType.getTypeFromID(Integer.valueOf(args[0])); // gets the vehicle type from args[0]
+			if(vehicleType== null) { // checks if the vehicletype is null
+				throw new NumberFormatException(); // throws a new exception if the vehicle id is not valid
+			}
+		} catch(NumberFormatException e) {
+			Messages.INVALID_VEHICLE.sendCommandSender(sender); // sends the sender a message to tell them their input was rejected
+			return true;
 		}
 		
 		if(args.length == 5) { // checks to see if we need to get a location from the arguments
@@ -112,7 +117,7 @@ public class CommandSummonVehicle extends VehicleCommand {
 				spawnLocation = new Location(world, x, y, z);
 				
 			} catch(NullPointerException | NumberFormatException e) {
-				MessagesEnum.COMMAND_SUMMON_VEHICLE_USAGE.sendMessageToCommandSender(sender); // if there is miss-input then the user will be sent the usage message
+				Messages.COMMAND_SUMMON_VEHICLE_USAGE.sendCommandSender(sender); // if there is miss-input then the user will be sent the usage message
 				return true; // breaks
 			}
 		}
@@ -129,7 +134,7 @@ public class CommandSummonVehicle extends VehicleCommand {
 		VehiclesAPI.getUserManager().getUser(((Player) sender).getUniqueId()).quickSetDrive(vehicle); // makes the player drive the vehicle
 		
 		// sends the sender a message confirming their action
-		MessagesEnum.SUCCESSFULLY_SPAWNED_VEHICLE.sendMessageToCommandSender(sender);
+		Messages.SUCCESSFULLY_SPAWNED_VEHICLE.sendCommandSender(sender);
 		return true; // breaks
 	}
 }

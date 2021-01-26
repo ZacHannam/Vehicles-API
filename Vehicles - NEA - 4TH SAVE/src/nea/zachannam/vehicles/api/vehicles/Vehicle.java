@@ -135,10 +135,10 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 		
 		setSpawned(true); // sets spawned to true
 		
-		if(VehiclesAPI.getChunkManager().isChunkLoaded(spawnLocation.toLocation())) {
-			this.show();
+		if(VehiclesAPI.getChunkManager().isChunkLoaded(spawnLocation.toLocation())) { // checks if the chunk the vehicle is spawning in is loaded
+			this.show(); // shows the vehicle as the chunk is loaded
 		} else {
-			VehiclesAPI.getChunkManager().addVehicleToBuffer(this);
+			VehiclesAPI.getChunkManager().addVehicleToBuffer(this); // adds the vehicle to the chunk buffer
 		}
 		
 		
@@ -149,8 +149,10 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 	 */
 	public void despawn() {
 		
-		if(!this.isHidden()) {
-			this.hide();
+		if(this.isHidden()) { // checks if the vehicle is hidden
+			VehiclesAPI.getChunkManager().removeVehicleFromBuffer(this); // if the vehicle is already hidden then it will remove it from the chunk buffer
+		} else {
+			this.hide(); // hides the vehicle
 		}
 		
 		setSpawned(false); // sets spawned to false

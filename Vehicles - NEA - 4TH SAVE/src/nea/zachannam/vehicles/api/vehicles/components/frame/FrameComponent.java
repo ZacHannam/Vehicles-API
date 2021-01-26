@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
@@ -154,6 +155,14 @@ public abstract class FrameComponent extends Component implements Frame {
 			this.getArmorStand().remove(); // removes (deletes) the entity from existance
 		}
 		this.setFrameEntity(null); // sets the new frame entity to null
+	}
+	
+	public ArmorStand getArmorStand() {
+		return this.getFrameEntity().getArmorStand();
+	}
+	
+	public Location getLocation() {
+		return this.getArmorStand().getLocation();
 	}
 
 	//-------------------------------------------------------------------- TICK ------------------------------------------------------------------------

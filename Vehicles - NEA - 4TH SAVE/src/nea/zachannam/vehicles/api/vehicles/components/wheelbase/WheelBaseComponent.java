@@ -438,7 +438,7 @@ public abstract class WheelBaseComponent extends Component implements WheelBase 
 		case PRESS_POWER:
 			return Math.sqrt(Math.pow(this.getMaxSpeed(), 2) - Math.pow((this.getLinearAcceleration()-this.getMaxSpeed()), 2));
 		case PRESS_BRAKE:
-			return this.getLinearAcceleration();
+			return Math.sqrt(Math.pow(this.getMaxSpeed(), 2) - Math.pow((this.getLinearAcceleration()-this.getMaxSpeed()), 2));
 		case NO_PRESS:
 			return Math.sqrt(Math.pow(this.getMaxSpeed(), 2) - Math.pow((this.getLinearAcceleration()-this.getMaxSpeed()), 2));
 		default:

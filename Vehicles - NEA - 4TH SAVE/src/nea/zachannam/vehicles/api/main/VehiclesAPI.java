@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import nea.zachannam.vehicles.api.chunk.ChunkManager;
 import nea.zachannam.vehicles.api.commands.CommandManager;
 import nea.zachannam.vehicles.api.database.VehiclesDatabase;
+import nea.zachannam.vehicles.api.enums.Messages;
 import nea.zachannam.vehicles.api.events.EventManager;
 import nea.zachannam.vehicles.api.user.UserManager;
 import nea.zachannam.vehicles.api.vehicles.VehicleManager;
@@ -53,6 +54,7 @@ public class VehiclesAPI extends JavaPlugin {
 	public void onEnable() {
 	
 		plugin = this;
+		Messages.reload();
 		eventManager = new EventManager();
 		chunkManager = new ChunkManager();
 		vehicleManager = new VehicleManager();
@@ -60,7 +62,7 @@ public class VehiclesAPI extends JavaPlugin {
 		commandManager = new CommandManager();	
 		vehiclesDatabase = new VehiclesDatabase();
 		
-		VehicleType.loadAllVehicles();
+		VehicleType.loadAll();
 		
 	}
 	
@@ -79,5 +81,20 @@ public class VehiclesAPI extends JavaPlugin {
 	public static boolean isChunkLaoded(Location location) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public static void reload() {
+		vehicleManager.halt();
+		vehiclesDatabase.halt();
+		userManager.halt();
+		chunkManager.halt();
+		
+		Messages.reload();
+		chunkManager = new ChunkManager();
+		vehicleManager = new VehicleManager();
+		userManager = new UserManager();
+		vehiclesDatabase = new VehiclesDatabase();
+		
+		VehicleType.reload();
 	}
 }

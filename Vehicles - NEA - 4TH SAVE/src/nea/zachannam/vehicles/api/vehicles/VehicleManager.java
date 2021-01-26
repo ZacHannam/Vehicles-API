@@ -13,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import lombok.Getter;
+import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.utils.VehicleMath;
 import nea.zachannam.vehicles.api.vehicles.components.Component;
 import nea.zachannam.vehicles.api.vehicles.exceptions.CouldNotCreateVehicleException;
@@ -41,7 +42,7 @@ public class VehicleManager {
 			return vehicle; // returns the vehicle
 		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 					| SecurityException | InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(new CouldNotCreateVehicleException(vehicleType.getName())); // throws a new exception if the vehicle has not been created
+			throw new RuntimeException(new CouldNotCreateVehicleException(String.valueOf(vehicleType.getID()))); // throws a new exception if the vehicle has not been created
 		}
 	}
 	
@@ -65,7 +66,9 @@ public class VehicleManager {
 			paramVehicle.despawn();
 		}
 		paramVehicle.halt(); // halts the vehicle
-				
+		
+		VehiclesAPI.getVehiclesDatabase().removeVehicle(paramVehicle.getUuid());
+		
 		this.getVehicles().remove(paramVehicle.getUuid()); // removes the vehicle from the hashmap
 	}
 	
@@ -187,7 +190,7 @@ public class VehicleManager {
 			return vehicle; // returns the vehicle
 		} catch (ParseException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 					| SecurityException | InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(new CouldNotCreateVehicleException(vehicleType.getName())); // throws a new exception if the vehicle has not been created
+			throw new RuntimeException(new CouldNotCreateVehicleException(String.valueOf(vehicleType.getID()))); // throws a new exception if the vehicle has not been created
 		}
 	}
 }

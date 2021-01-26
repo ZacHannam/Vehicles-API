@@ -16,6 +16,7 @@ public class CommandManager extends ArrayList<VehicleCommand> {
 	 */
 	public CommandManager() {
 		this.register(new CommandSummonVehicle());
+		this.register(new CommandVehicles());
 	}
 
 	/**

@@ -3,6 +3,7 @@ package nea.zachannam.vehicles.api.database;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
@@ -68,7 +69,14 @@ public class VehiclesDatabase extends Database{
 
 	}
 	
+
+	public void removeVehicle(UUID paramUUID) {
+		// TODO Auto-generated method stub
+		this.executeUpdate("DELETE FROM " + TABLE_NAME + " WHERE vehicleUUID == '" + paramUUID.toString() + "';");
+	}
+	
 	public void halt() {
 		super.halt();
 	}
+
 }
