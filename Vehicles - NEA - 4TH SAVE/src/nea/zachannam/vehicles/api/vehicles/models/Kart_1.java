@@ -189,7 +189,7 @@ class WheelBase_Kart_1 extends WheelBaseComponent {
 
 	@Override
 	public float STEERING_SPEED() {
-		return (float) (Math.PI / 90);
+		return (float) (Math.PI / 180);
 	}
 
 	@Override

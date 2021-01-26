@@ -12,5 +12,4 @@ public class ChunkUnload implements Listener {
 	public void onChunkUnload(ChunkUnloadEvent event) {
 		VehiclesAPI.getChunkManager().unloadChunk(event.getChunk());
 	}
-
 }

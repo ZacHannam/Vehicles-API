@@ -140,6 +140,8 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 		} else {
 			VehiclesAPI.getChunkManager().addVehicleToBuffer(this);
 		}
+		
+		
 	}
 	
 	/**
@@ -252,7 +254,7 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 	 */
 	public void show() {
 
-		if(!this.isSpawned() || !this.isHidden()) return; // if the vehicle is not spawned then it will return, as the vehicle should not be shown. Also checks if the vehicle is shown, if it is shown then if shown again, will cause problems.
+		if(!this.isSpawned()) return; // if the vehicle is not spawned then it will return, as the vehicle should not be shown. Also checks if the vehicle is shown, if it is shown then if shown again, will cause problems.
 		
 		for(Component component : components) { // runs through each of the components in the vehicle
 			component.spawn(this.getLocation()); // spawns the component
@@ -292,8 +294,8 @@ public abstract class Vehicle implements ComponentBasedVehicle {
 	 */
 	public void hide() {
 		
-		if(!this.isSpawned()|| this.isHidden()) return; // if the vehicle is not spawned then it cannot be hidden. Also checks if the vehicle is already hidden, if the vehicle is already hidden, then errors may occur.
-		
+		if(!this.isSpawned()) return; // if the vehicle is not spawned then it cannot be hidden. Also checks if the vehicle is already hidden, if the vehicle is already hidden, then errors may occur.
+
 		Bukkit.getScheduler().cancelTask(taskID); // cancels the repeating tick task
 		
 		for(Component component : components) {	// runs through each component in the vehicle

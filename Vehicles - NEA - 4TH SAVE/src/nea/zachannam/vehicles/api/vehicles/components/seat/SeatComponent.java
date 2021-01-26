@@ -20,13 +20,13 @@ import nea.zachannam.vehicles.api.vehicles.components.seat.entity.EntitySeat;
 import nea.zachannam.vehicles.api.vehicles.components.seat.exceptions.SeatOccupiedException;
 
 public abstract class SeatComponent extends Component {
-	
+
 	//-------------------------------------------------------------------- COMPONENT METHODS ------------------------------------------------------------------------
 	
 	public String getComponentType() {
 		return ComponentName.SEAT.getName();
 	}
-	
+
 	public String[] getRequiredComponents() {
 		return new String[] {};
 	}
@@ -35,28 +35,28 @@ public abstract class SeatComponent extends Component {
 	
 	public abstract Vector OFFSET();
 
-	//-------------------------------------------------------------------- RIDER ------------------------------------------------------------------------
+	//-------------------------------------------------------------------- ARMORSTAND METHODS ------------------------------------------------------------------------
+	
+	@Getter
+	@Setter
+	private EntitySeat seatEntity;
+	
+	public ArmorStand getArmorStand() {
+		return this.getSeatEntity().getArmorStand();
+	}
+	
+	//-------------------------------------------------------------------- RIDER METHODS ------------------------------------------------------------------------
 	
 	@Getter
 	private Player rider;
 	
-	@SuppressWarnings("deprecation")
-	public void setRider(Player paramPlayer) throws SeatOccupiedException {
-		
-		if(this.getArmorStand().getPassengers().size() >= 1) {
-			throw new SeatOccupiedException();
-		}
-		
-		if(paramPlayer == null) {
-			return;
-		}
-		
-		this.getArmorStand().setPassenger(paramPlayer);
-		
-		this.setRider(paramPlayer);
-		this.getVehicle().onMount(paramPlayer);
+	public boolean hasRider() {
+		return rider != null && this.getArmorStand().getPassengers().size() > 0;
 	}
-	
+
+	/**
+	 * Used to eject the ride from the seat
+	 */
 	public void ejectRider() {
 		if(!this.hasRider()) {
 			return;
@@ -83,50 +83,63 @@ public abstract class SeatComponent extends Component {
 		}.runTaskLater(VehiclesAPI.getPlugin(), 1);
 	}
 	
-	public boolean hasRider() {
-		return getRider() != null && this.getArmorStand().getPassengers().size() > 0;
+	/**
+	 * Used to set the rider for the vehicle
+	 * @param paramPlayer
+	 * @throws SeatOccupiedException
+	 */
+	@SuppressWarnings("deprecation")
+	public void setRider(Player paramPlayer) throws SeatOccupiedException {
+
+		if(this.getArmorStand().getPassengers().size() >= 1) {
+			throw new SeatOccupiedException();
+		}
+
+		if(paramPlayer == null) {
+			return;
+		}
+
+		this.getArmorStand().setPassenger(paramPlayer);
+
+		this.rider = paramPlayer;
+		this.getVehicle().onMount(paramPlayer);
 	}
 	
-	public void removeRider() {
+	private void removeRider() {
 		this.rider = null;
 	}
 	
-	//-------------------------------------------------------------------- METHODS ------------------------------------------------------------------------
 	
-	public void move() {
-		Location newLocation = VehicleMath.getVectorYawLocation(this.getVehicle().getLocation(), this.getOffset(), this.getVehicle().getLocation().getYaw());
-		this.getSeatEntity().setLocation(newLocation.getX(), newLocation.getY(), newLocation.getZ(), 0, 0);
-	}
+	//-------------------------------------------------------------------- SETUP ------------------------------------------------------------------------
 
-	public ArmorStand getArmorStand() {
-		return this.getSeatEntity().getArmorStand();
-	}
-	
-	public Location getLocation() {
-		return this.getArmorStand().getLocation();
-	}
-	
-	//-------------------------------------------------------------------- TICK ------------------------------------------------------------------------
-	
-	@Override
-	public void tick() {
-		move();
-	}
-	
-	//-------------------------------------------------------------------- SPAWNING AND DESPAWNING ------------------------------------------------------------------------
-	
 	@Getter
 	@Setter
 	private Vector offset;
 	
-	@Getter
-	@Setter
-	private EntitySeat seatEntity;
+	//-------------------------------------------------------------------- METHODS ------------------------------------------------------------------------
+
+	public Location getLocation() {
+		return this.getArmorStand().getLocation();
+	}
 	
-	@Getter
-	@Setter
-	private Seat seat;
+	//-------------------------------------------------------------------- MOVEMENT ------------------------------------------------------------------------
+
+	public void move() {
+
+		Location newLocation = VehicleMath.getVectorYawLocation(this.getVehicle().getLocation(), this.getOffset(), this.getVehicle().getLocation().getYaw());
+		this.getSeatEntity().setLocation(newLocation.getX(), newLocation.getY(), newLocation.getZ(), 0, 0);
+
+	}
 	
+	//-------------------------------------------------------------------- TICK ------------------------------------------------------------------------
+
+	@Override
+	public void tick() {
+		move();
+	}	
+
+	//-------------------------------------------------------------------- SPAWNING AND DESPAWNING ------------------------------------------------------------------------
+
 	@Override
 	public void spawn(VehicleLocation paramLocation) {
 		Location location = VehicleMath.getVectorYawLocation(paramLocation, this.getOffset(), paramLocation.getYaw());
@@ -135,21 +148,14 @@ public abstract class SeatComponent extends Component {
 	
 	@Override
 	public void despawn() {
-		try {
-			if(this.hasRider()) {
-				VehiclesAPI.getUserManager().getUser(this.getRider().getUniqueId()).dismount();
-			}
-			this.ejectRider();
-			if(this.seat != null) {
-				this.getArmorStand().remove();
-			}
-		} catch(Exception e) {
-			this.removeRider();
+		if(this.getSeatEntity() != null) {
+			this.getArmorStand().remove();
 		}
+		this.removeRider();
 	}
 	
 	//-------------------------------------------------------------------- CONSTRUCTOR ------------------------------------------------------------------------
-	
+
 	public SeatComponent(Vehicle paramVehicle) {
 		super(paramVehicle);
 

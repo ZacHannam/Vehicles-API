@@ -92,65 +92,78 @@ public abstract class FrameComponent extends Component implements Frame {
 	 * Therefore vehicle must be flat at all times.
 	 */
 	public Point2D[] getFrameCorners() {
-		Point2D[] points = new Point2D[4];
+		Point2D[] points = new Point2D[4]; // defines a list of 4 Point2Ds
 		
-		VehicleLocation location = super.getVehicle().getLocation();
-		double yaw = this.getYawOffset() + location.getYaw();
+		VehicleLocation location = super.getVehicle().getLocation(); // gets the location of the vehicle
+		double yaw = this.getYawOffset() + location.getYaw(); // yaw offset of the frame + the vehicles current yaw
 		
+		// gets the x and z for all of the corners of the frame
 		points[0] = Point2D.fromLocation(VehicleMath.getVectorYawLocation(location, new Vector(getWidth() / 2, 0, getLength() / 2), yaw));
 		points[1] = Point2D.fromLocation(VehicleMath.getVectorYawLocation(location, new Vector(-getWidth() / 2, 0, getLength() / 2), yaw));
 		points[2] = Point2D.fromLocation(VehicleMath.getVectorYawLocation(location, new Vector(-getWidth() / 2, 0, -getLength() / 2), yaw));
 		points[3] = Point2D.fromLocation(VehicleMath.getVectorYawLocation(location, new Vector(getWidth() / 2, 0, -getLength() / 2), yaw));
-		return points;
+		return points; // returns the 4 corners (x and z) of the Frame
 	}
 	
 	//-------------------------------------------------------------------- POSITION METHODS ------------------------------------------------------------------------
 	
+	/**
+	 * Called every tick to update the position of the frame
+	 */
 	public void updatePosition() {
 		
-		Location newLocation = VehicleMath.getVectorYawLocation(getVehicle().getLocation(), this.getOffset(), this.getVehicle().getLocation().getYaw());
+		Location newLocation = VehicleMath.getVectorYawLocation(getVehicle().getLocation(), this.getOffset(), this.getVehicle().getLocation().getYaw()); // gets the new location of the vehicle
 		
-		this.getFrameEntity().setLocation(newLocation.getX(), newLocation.getY(), newLocation.getZ(), 0, 0);
+		this.getFrameEntity().setLocation(newLocation.getX(), newLocation.getY(), newLocation.getZ(), 0, 0); // Sets the location of the frame entity
 		
-		this.getArmorStand().setHeadPose(new EulerAngle(0, super.getVehicle().getLocation().getYaw() + this.getYawOffset(), 0));
+		this.getArmorStand().setHeadPose(new EulerAngle(0, super.getVehicle().getLocation().getYaw() + this.getYawOffset(), 0)); // Sets the headpose (yaw rotation of the vehicle)
 	}
 	
 	//-------------------------------------------------------------------- SPAWNING AND DESPAWNING ------------------------------------------------------------------------
 	
 	@Getter
 	@Setter
-	private EntityFrame frameEntity;
+	private EntityFrame frameEntity; // stores the entity used to show the body
 	
 	@Getter
 	@Setter
-	private Vector offset;
+	private Vector offset; // stores the added position of the frame relative to the vehicle
 	
 	@Getter
 	@Setter
-	private double yawOffset;
+	private double yawOffset;// stores the added rotation of the frame
 	
+	/**
+	 * Called to spawn the vehicle at location: paramLocation
+	 */
 	@Override
 	public void spawn(VehicleLocation paramLocation) {
 
-		Location location = VehicleMath.getVectorYawLocation(paramLocation, this.getOffset(), paramLocation.getYaw());
+		Location location = VehicleMath.getVectorYawLocation(paramLocation, this.getOffset(), paramLocation.getYaw() + this.getYawOffset()); // gets the new spawning position of the frame relative to the spawning position
 		
-		this.setFrameEntity(new EntityFrame(super.getVehicle(), Point4D.fromLocation(location)));
-		this.applyHelmetItem(this.getHelmetItem());
+		this.setFrameEntity(new EntityFrame(super.getVehicle(), Point4D.fromLocation(location))); // creates a new entity at the starting position of the frame
+		this.applyHelmetItem(this.getHelmetItem()); // sets the helmet item of the vehicle to the frame item.
 	}
 	
+	/**
+	 * Called to despawn the vehicle
+	 */
 	@Override
 	public void despawn() {
-		if(this.getFrameEntity() != null) {
-			this.getArmorStand().remove();
+		if(this.getFrameEntity() != null) { // checks if the frame entity still exists
+			this.getArmorStand().remove(); // removes (deletes) the entity from existance
 		}
-		this.setFrameEntity(null);
+		this.setFrameEntity(null); // sets the new frame entity to null
 	}
 
 	//-------------------------------------------------------------------- TICK ------------------------------------------------------------------------
 	
+	/**
+	 * Runs every tick
+	 */
 	@Override
 	public void tick() {
-		updatePosition();
+		updatePosition(); // updates the position of the frame
 	}
 	
 	//-------------------------------------------------------------------- CONSTRUCTOR ------------------------------------------------------------------------

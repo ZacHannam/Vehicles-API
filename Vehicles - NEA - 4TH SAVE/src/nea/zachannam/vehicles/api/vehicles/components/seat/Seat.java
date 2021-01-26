@@ -10,16 +10,14 @@ import nea.zachannam.vehicles.api.vehicles.components.seat.exceptions.SeatOccupi
 
 public interface Seat {
 	
-	public Location getLocation();
 	public void setRider(Player paramPlayer) throws SeatOccupiedException;
 	public boolean hasRider();
 	public Player getRider();
 	public void ejectRider();
 	public EntitySeat getSeatEntity();
 	public void setSeatEntity(EntitySeat paramSeatEntity);
-	public ArmorStand getArmorStand();
 	public Vector getOffset();
 	public void setOffset(Vector paramOffset);
-	
-	
+	public Location getLocation();
+	public ArmorStand getArmorStand();
 }

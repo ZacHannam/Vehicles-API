@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -25,13 +26,33 @@ import nea.zachannam.vehicles.api.vehicles.components.ComponentName;
 
 public abstract class InventoryComponent extends Component implements nea.zachannam.vehicles.api.vehicles.components.inventory.Inventory  {
 
-	@Setter
-	@Getter
-	private org.bukkit.inventory.Inventory inventory;
+	//-------------------------------------------------------------------- COMPONENT METHODS ------------------------------------------------------------------------
+	
+	
+	@Override
+	public String getComponentName() {
+		return ComponentName.INVENTORY.getName();
+	}
+
+	@Override
+	public String[] getRequiredComponents() {
+		return new String[] {};
+	}
+	
+	//-------------------------------------------------------------------- ABSTRACT METHODS ------------------------------------------------------------------------
 	
 	private static final int SIZE = 27;
 	private static final String NAME = ChatColor.BLUE + "Vehicle";
 	
+
+	
+	//-------------------------------------------------------------------- INVENTORY META ------------------------------------------------------------------------
+	
+	/**
+	 * Recursive algorithm that turns a Map of String and Object to a JSONObject
+	 * @param paramMap
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	private JSONObject toJSON(Map<String, Object> paramMap) {
 		JSONObject meta = new JSONObject();
@@ -45,6 +66,9 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 		return meta;
 	}
 	
+	/**
+	 * Used to get the meta of the inventory
+	 */
 	@SuppressWarnings("unchecked")
 	public JSONObject getMeta() {
 		if(this.getInventory() == null) return null;
@@ -71,6 +95,9 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 		return inventoryMeta;
 	}
 	
+	/**
+	 * Builds the inventory using the previously saved meta
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildFromMeta(JSONObject paramMeta) {
 		
@@ -118,10 +145,18 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 		
 	}
 	
+	//-------------------------------------------------------------------- VEHICLE METHODS ------------------------------------------------------------------------
+	
 	public void onVehicleClick(Player paramPlayer) {
 		User user = VehiclesAPI.getUserManager().getUser(paramPlayer.getUniqueId());
 		user.openVehicleInventory(super.getVehicle());
 	}
+	
+	//-------------------------------------------------------------------- INVENTORY METHODS ------------------------------------------------------------------------
+
+	@Setter
+	@Getter
+	private org.bukkit.inventory.Inventory inventory;
 	
 	public void onInventoryClick(InventoryClickEvent event) {
 		
@@ -131,16 +166,24 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 		
 		if(event.getRawSlot() == 13) {
 			
-			if(this.getDriverSeat().hasRider()) {
-				MessagesEnum.SEAT_OCCUPIED.sendMessage(user.getPlayer());
-				return;
-			}
-			
 			if(user.inSeat()) {
 				MessagesEnum.USER_IN_SEAT.sendMessage(user.getPlayer());
 				return;
 			}
 			
+			if(this.getDriverSeat().hasRider()) {
+				MessagesEnum.SEAT_OCCUPIED.sendMessage(user.getPlayer());
+				return;
+			}
+			
+			user.quickSetDrive(super.getVehicle());
+			user.getPlayer().closeInventory();
+		}
+	}
+	
+	@Override
+	public void onMount(Player paramRider) {
+		if(super.getDriverSeat().hasRider()) {
 			ItemStack inSeat = new ItemStack(Material.RED_STAINED_GLASS_PANE);
 			ItemMeta inSeatMeta = inSeat.getItemMeta();
 			inSeatMeta.setDisplayName(ChatColor.RED + "Seat Occupied!");
@@ -148,16 +191,21 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 			
 			this.getInventory().setItem(13, inSeat);
 		}
-		
-		user.quickSetDrive(super.getVehicle());
-		user.getPlayer().closeInventory();
 	}
 	
-	public InventoryComponent(Vehicle paramVehicle) {
-		super(paramVehicle);
-		
-		this.buildInventory();
+	@Override
+	public void onDismount(OfflinePlayer paramRider) {
+		if(!super.getDriverSeat().hasRider()) {
+			ItemStack seatUnoccupied = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
+			ItemMeta seatUnoccupiedMeta = seatUnoccupied.getItemMeta();
+			seatUnoccupiedMeta.setDisplayName(ChatColor.RED + "Click to sit in vehicle");
+			seatUnoccupied.setItemMeta(seatUnoccupiedMeta);
+			
+			this.getInventory().setItem(13, seatUnoccupied);
+		}
 	}
+	
+
 	
 	private void buildInventory() {
 		
@@ -185,22 +233,13 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 		
 	}
 	
-	public void onDriverDismount(Player paramRider) {
-		ItemStack seatUnoccupied = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
-		ItemMeta seatUnoccupiedMeta = seatUnoccupied.getItemMeta();
-		seatUnoccupiedMeta.setDisplayName(ChatColor.RED + "Click to sit in vehicle");
-		seatUnoccupied.setItemMeta(seatUnoccupiedMeta);
+	//-------------------------------------------------------------------- CONSTRUCTOR ------------------------------------------------------------------------
 
-		this.getInventory().setItem(13, seatUnoccupied);
+	public InventoryComponent(Vehicle paramVehicle) {
+		super(paramVehicle);
+		
+		this.buildInventory();
 	}
 
-	@Override
-	public String getComponentName() {
-		return ComponentName.INVENTORY.getName();
-	}
 
-	@Override
-	public String[] getRequiredComponents() {
-		return new String[] {};
-	}
 }
