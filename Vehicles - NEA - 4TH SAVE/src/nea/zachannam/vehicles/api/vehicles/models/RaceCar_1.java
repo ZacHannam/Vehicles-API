@@ -3,7 +3,7 @@ package nea.zachannam.vehicles.api.vehicles.models;
 import java.util.UUID;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
@@ -13,8 +13,7 @@ import nea.zachannam.vehicles.api.vehicles.components.frame.FrameComponent;
 import nea.zachannam.vehicles.api.vehicles.components.seat.driverseat.DriverSeatComponent;
 import nea.zachannam.vehicles.api.vehicles.components.steeringwheel.SteeringWheelComponent;
 import nea.zachannam.vehicles.api.vehicles.components.wheelbase.WheelBaseComponent;
-import net.minecraft.server.v1_16_R1.NBTTagCompound;
-
+import net.minecraft.server.v1_16_R3.NBTTagCompound;
 
 class Frame_RaceCar_1 extends FrameComponent {
 
@@ -31,7 +30,7 @@ class Frame_RaceCar_1 extends FrameComponent {
 
         item.setItemMeta(itemMeta);
 
-      	net.minecraft.server.v1_16_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        net.minecraft.server.v1_16_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
 
         NBTTagCompound nmsData = nmsItem.getTag();
 
@@ -110,7 +109,7 @@ class SteeringWheel_RaceCar_1 extends SteeringWheelComponent{
 
         item.setItemMeta(itemMeta);
 
-      	net.minecraft.server.v1_16_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        net.minecraft.server.v1_16_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
 
         NBTTagCompound nmsData = nmsItem.getTag();
 
@@ -130,12 +129,12 @@ class SteeringWheel_RaceCar_1 extends SteeringWheelComponent{
 
 	@Override
 	public double STEERINGWHEEL_ANGLE() {
-		return Math.toRadians(42);
+		return 0.5 * Math.PI;
 	}
 
 	@Override
 	public Vector OFFSET() {
-		return new Vector (0, -0.55, -0.3);
+		return new Vector (0, -1.0, -0.3);
 	}
 
 	@Override

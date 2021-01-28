@@ -100,6 +100,7 @@ public enum Messages {
 		paramCommandSender.sendMessage(this.getMessage());
 	}
 
+	@SuppressWarnings("deprecation")
 	public void sendMessageWithHover(Player paramPlayer, String paramHoverText, ImmutableMap<String, String> paramFormat) {
 		
 		String messagep = this.getMessage();

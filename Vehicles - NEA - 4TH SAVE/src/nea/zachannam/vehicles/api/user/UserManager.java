@@ -96,7 +96,6 @@ public class UserManager extends HashMap<UUID, User> {
 		for(Player player : Bukkit.getServer().getOnlinePlayers()) { // iterates through all players on the server
 			this.createUser(player); // creates a new user object for each player
 		}
-		
 	}
 	
 	/**

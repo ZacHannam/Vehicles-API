@@ -10,8 +10,8 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlock;
 import org.bukkit.util.Vector;
 
 import lombok.Getter;
@@ -23,7 +23,7 @@ import nea.zachannam.vehicles.api.vehicles.Vehicle;
 import nea.zachannam.vehicles.api.vehicles.VehicleLocation;
 import nea.zachannam.vehicles.api.vehicles.components.Component;
 import nea.zachannam.vehicles.api.vehicles.components.ComponentName;
-import net.minecraft.server.v1_16_R1.BlockPosition;
+import net.minecraft.server.v1_16_R3.BlockPosition;
 
 enum Direction {
 	
@@ -396,7 +396,9 @@ public abstract class WheelBaseComponent extends Component implements WheelBase 
 		if(this.isInReverse()) {
 			this.setDirection(Direction.PRESS_BRAKE);
 			this.setLinearAcceleration(Math.max(this.getLinearAcceleration() - this.getBrakeAcceleration(), 0));
-			this.playEffectAtWheels(Effect.SMOKE);
+			if(this.getLinearAcceleration() != 0) {
+				this.playEffectAtWheels(Effect.SMOKE);
+			}
 		} else {
 			this.setDirection(Direction.PRESS_POWER);
 			this.setLinearAcceleration(Math.min(this.getLinearAcceleration() + this.getPowerAcceleration(), maxSpeed));
@@ -417,7 +419,9 @@ public abstract class WheelBaseComponent extends Component implements WheelBase 
 		} else {
 			this.setDirection(Direction.PRESS_BRAKE);
 			this.setLinearAcceleration(Math.max(this.getLinearAcceleration() - this.getBrakeAcceleration(), 0)); // used when braking
-			this.playEffectAtWheels(Effect.SMOKE);
+			if(this.getLinearAcceleration() != 0) {
+				this.playEffectAtWheels(Effect.SMOKE);
+			}
 		}
 		this.setCanSwitchReverse(false);
 	}

@@ -3,7 +3,7 @@ package nea.zachannam.vehicles.api.vehicles;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 
@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.utils.Point4D;
-import net.minecraft.server.v1_16_R1.EntityArmorStand;
+import net.minecraft.server.v1_16_R3.EntityArmorStand;
 
 public class VehicleEntity extends EntityArmorStand {
 	

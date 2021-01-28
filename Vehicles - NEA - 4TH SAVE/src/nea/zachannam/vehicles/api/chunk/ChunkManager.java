@@ -223,7 +223,7 @@ public class ChunkManager {
 		
 		BufferChunk bufferChunk = this.getBufferChunk(chunkID);
 		
-		if(bufferChunk.getUUIDS().length == 1){
+		if(bufferChunk.getUUIDS() != null && bufferChunk.getUUIDS().length == 1){
 			this.removeBufferChunk(chunkID);
 		} else {
 			bufferChunk.removeVehicleUUID(paramVehicle.getUuid());

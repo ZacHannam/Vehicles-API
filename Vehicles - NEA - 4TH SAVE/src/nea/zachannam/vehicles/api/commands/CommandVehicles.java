@@ -66,12 +66,15 @@ public class CommandVehicles extends VehicleCommand {
 				return true;
 			}
 			
-			Collection<Vehicle> vehiclesNoAccess = VehiclesAPI.getVehicleManager().getVehicles().values();
-			List<Vehicle> vehicles = new ArrayList<Vehicle>(vehiclesNoAccess);
-			
 			int numberDestroyed = 0;
-			for(Vehicle vehicle : vehicles) {
-				VehiclesAPI.getVehicleManager().destroyVehicle(vehicle);
+			
+			while(VehiclesAPI.getVehicleManager().getVehicles().size() > 0) {
+				Vehicle v = null;
+				b: for(Vehicle vehicle : VehiclesAPI.getVehicleManager().getVehicles().values()) {
+					v = vehicle;
+					break b;
+				}
+				VehiclesAPI.getVehicleManager().destroyVehicle(v);
 				numberDestroyed++;
 			}
 			

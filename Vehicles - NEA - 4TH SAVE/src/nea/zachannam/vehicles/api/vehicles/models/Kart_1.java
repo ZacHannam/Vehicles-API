@@ -3,7 +3,7 @@ package nea.zachannam.vehicles.api.vehicles.models;
 import java.util.UUID;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
@@ -14,7 +14,7 @@ import nea.zachannam.vehicles.api.vehicles.components.inventory.InventoryCompone
 import nea.zachannam.vehicles.api.vehicles.components.seat.driverseat.DriverSeatComponent;
 import nea.zachannam.vehicles.api.vehicles.components.steeringwheel.SteeringWheelComponent;
 import nea.zachannam.vehicles.api.vehicles.components.wheelbase.WheelBaseComponent;
-import net.minecraft.server.v1_16_R1.NBTTagCompound;
+import net.minecraft.server.v1_16_R3.NBTTagCompound;
 
 class Frame_Kart_1 extends FrameComponent {
 
@@ -37,7 +37,7 @@ class Frame_Kart_1 extends FrameComponent {
 
         item.setItemMeta(itemMeta);
 
-      	net.minecraft.server.v1_16_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        net.minecraft.server.v1_16_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
 
         NBTTagCompound nmsData = nmsItem.getTag();
 
@@ -95,7 +95,7 @@ class DriverSeat_Kart_1 extends DriverSeatComponent {
 
 	@Override
 	public Vector OFFSET() {
-		return new Vector(0, 0, 0);
+		return new Vector(0, 0, -0.2);
 	}
 }
 
@@ -119,7 +119,7 @@ class SteeringWheel_Kart_1 extends SteeringWheelComponent {
 
         item.setItemMeta(itemMeta);
 
-      	net.minecraft.server.v1_16_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        net.minecraft.server.v1_16_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
 
         NBTTagCompound nmsData = nmsItem.getTag();
 
@@ -136,7 +136,7 @@ class SteeringWheel_Kart_1 extends SteeringWheelComponent {
 	
 	@Override
 	public Vector OFFSET() {
-		return new Vector (0, -0.55, -0.5);
+		return new Vector (0, -0.57, -0.5);
 	}
 	
 	@Override
@@ -174,7 +174,7 @@ class WheelBase_Kart_1 extends WheelBaseComponent {
 
 	@Override
 	public double MAX_SPEED() {
-		return 0.6;
+		return 0.8;
 	}
 
 	@Override
@@ -209,7 +209,7 @@ class WheelBase_Kart_1 extends WheelBaseComponent {
 
 	@Override
 	public double BRAKE_ACCELERATION() {
-		return 0.012;
+		return 0.014;
 	}
 }
 

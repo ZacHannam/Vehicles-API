@@ -120,7 +120,7 @@ public abstract class SteeringWheelComponent extends Component implements Steeri
 	@Override
 	public void despawn() {
 		
-		if(this.getArmorStand() != null) {
+		if(this.getSteeringWheelEntity() != null) {
 			this.getArmorStand().remove();
 		}
 		this.setSteeringWheelEntity(null);

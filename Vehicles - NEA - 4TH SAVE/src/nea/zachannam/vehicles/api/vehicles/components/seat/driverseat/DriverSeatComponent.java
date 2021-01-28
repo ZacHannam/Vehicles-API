@@ -1,15 +1,15 @@
 package nea.zachannam.vehicles.api.vehicles.components.seat.driverseat;
 
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 
 import lombok.Getter;
 import lombok.Setter;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
 import nea.zachannam.vehicles.api.vehicles.components.ComponentName;
 import nea.zachannam.vehicles.api.vehicles.components.seat.SeatComponent;
-import net.minecraft.server.v1_16_R1.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_16_R1.PacketPlayOutTitle;
-import net.minecraft.server.v1_16_R1.PacketPlayOutTitle.EnumTitleAction;
+import net.minecraft.server.v1_16_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_16_R3.PacketPlayOutTitle;
+import net.minecraft.server.v1_16_R3.PacketPlayOutTitle.EnumTitleAction;
 
 public abstract class DriverSeatComponent extends SeatComponent implements DriverSeat {
 

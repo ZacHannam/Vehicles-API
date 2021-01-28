@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -98,7 +99,7 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 	/**
 	 * Builds the inventory using the previously saved meta
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 	public void buildFromMeta(JSONObject paramMeta) {
 		
 		try {
@@ -121,7 +122,8 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 				ItemMeta itemMeta = null;
 				
 				try {
-					Class[] craftMetaItemClasses = Class.forName("org.bukkit.craftbukkit.v1_16_R1.inventory.CraftMetaItem").getDeclaredClasses();
+					String serverVersion = VehiclesAPI.getPlugin().getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3]; // gets the version of the server
+					Class[] craftMetaItemClasses = Class.forName("org.bukkit.craftbukkit."+serverVersion+".inventory.CraftMetaItem").getDeclaredClasses();
 					
 					for (Class craftMetaItemClass : craftMetaItemClasses) {
 						if(!craftMetaItemClass.getSimpleName().equals("SerializableMeta")) continue;
@@ -130,6 +132,18 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 						itemMeta = (ItemMeta) deserialize.invoke(null, seralizedMeta);
 						
 					}
+					
+					if(seralizedMeta.containsKey("enchants")) {
+						
+						for(Entry<String, Object> entry : ((Map<String, Object>) seralizedMeta.get("enchants")).entrySet()) {
+							Enchantment enchantmentName = Enchantment.getByName(entry.getKey());
+							long level = (long) entry.getValue();
+							
+							itemMeta.addEnchant(enchantmentName, (int) level, true);
+						}
+					}
+					
+					
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -187,6 +201,7 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 			ItemStack inSeat = new ItemStack(Material.RED_STAINED_GLASS_PANE);
 			ItemMeta inSeatMeta = inSeat.getItemMeta();
 			inSeatMeta.setDisplayName(ChatColor.RED + "Seat Occupied!");
+			inSeatMeta.addEnchant(Enchantment.DURABILITY, 3, true);
 			inSeat.setItemMeta(inSeatMeta);
 			
 			this.getInventory().setItem(13, inSeat);
@@ -199,6 +214,7 @@ public abstract class InventoryComponent extends Component implements nea.zachan
 			ItemStack seatUnoccupied = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
 			ItemMeta seatUnoccupiedMeta = seatUnoccupied.getItemMeta();
 			seatUnoccupiedMeta.setDisplayName(ChatColor.RED + "Click to sit in vehicle");
+			seatUnoccupiedMeta.addEnchant(Enchantment.DURABILITY, 3, true);
 			seatUnoccupied.setItemMeta(seatUnoccupiedMeta);
 			
 			this.getInventory().setItem(13, seatUnoccupied);
