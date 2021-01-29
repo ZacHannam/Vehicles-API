@@ -1,13 +1,11 @@
 package nea.zachannam.vehicles.api.events.player;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
-import nea.zachannam.vehicles.api.events.VehicleEvent;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 import nea.zachannam.vehicles.api.user.User;
 
@@ -20,8 +18,6 @@ public class EntityDismount implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerDismount(EntityDismountEvent event) {
-		@SuppressWarnings("unused")
-		VehicleEvent vehicleEvent = new VehicleEvent((Event) event); // logs event
 		
 		if(event.isCancelled()) return; // checks if the event is cancelled
 		if(event.getEntity() instanceof Player) { // checks if entity is a player

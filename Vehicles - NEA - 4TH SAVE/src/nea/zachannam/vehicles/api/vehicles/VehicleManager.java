@@ -61,7 +61,7 @@ public class VehicleManager {
 	 * Used to despawn a vehicle and halt it.
 	 * @param paramVehicle
 	 */
-	public void destroyVehicle(Vehicle paramVehicle) { 
+	private void destroyVehicle(Vehicle paramVehicle, boolean paramRemoveFromMap) { 
 		if(paramVehicle.isSpawned()) { // checks if the vehicle is spawned
 			paramVehicle.despawn();
 		}
@@ -69,7 +69,9 @@ public class VehicleManager {
 		
 		VehiclesAPI.getVehiclesDatabase().removeVehicle(paramVehicle.getUuid());
 		
-		this.getVehicles().remove(paramVehicle.getUuid()); // removes the vehicle from the hashmap
+		if(paramRemoveFromMap) {
+			this.getVehicles().remove(paramVehicle.getUuid()); // removes the vehicle from the hashmap
+		}
 	}
 	
 	/**
@@ -81,8 +83,30 @@ public class VehicleManager {
 			
 			Vehicle vehicle = this.getVehicleFromUUID(paramUUID); // gets the Vehicle
 			
-			this.destroyVehicle(vehicle); // destroys the vehicle
+			this.destroyVehicle(vehicle, true); // destroys the vehicle
 		}
+	}
+	
+	public void destroyVehicle(Vehicle paramVehicle) {
+		this.destroyVehicle(paramVehicle, true); // destroys the vehicle
+	}
+	
+	/**
+	 * Used to destroy all of the vehicles on the server permanently.
+	 * Returns the number of vehicles destroyed
+	 * @return
+	 */
+	public int destroyAllVehicles() {
+		
+		for(Vehicle vehicle : this.getVehicles().values()) {
+			
+			this.destroyVehicle(vehicle, false);
+		
+		}
+		
+		int numberOfVehicles = this.getNumberOfVehicles();
+		this.getVehicles().clear();
+		return numberOfVehicles;
 	}
 
 	/**

@@ -1,12 +1,10 @@
 package nea.zachannam.vehicles.api.events.player;
 
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
-import nea.zachannam.vehicles.api.events.VehicleEvent;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
 import nea.zachannam.vehicles.api.vehicles.VehicleEntity;
 
@@ -20,8 +18,6 @@ public class PlayerInteractAtEntity implements Listener {
 	 */
 	@EventHandler
 	public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
-		@SuppressWarnings("unused")
-		VehicleEvent vehicleEvent = new VehicleEvent((Event) event); // logs event
 		
 		if(!(event.getRightClicked() instanceof ArmorStand)) return; // checks if clicked
 				

@@ -1,11 +1,11 @@
 package nea.zachannam.vehicles.api.events.player;
 
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-import nea.zachannam.vehicles.api.events.VehicleEvent;
+import nea.zachannam.vehicles.api.main.VehiclesAPI;
+import nea.zachannam.vehicles.api.user.User;
 
 public class InventoryClose implements Listener {
 	
@@ -17,10 +17,12 @@ public class InventoryClose implements Listener {
 	 */
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
-		VehicleEvent vehicleEvent = new VehicleEvent((Event) event); // logs event
 		
-		if(vehicleEvent.getUser().inVehicleInventory()) { // checks if the player is in a vehicles inventory
-			vehicleEvent.getUser().closeInventory(); // remove the player from the vehicles inventory
+		if(VehiclesAPI.getUserManager().isUser(event.getPlayer().getUniqueId())) {
+			User user = VehiclesAPI.getUserManager().getUser(event.getPlayer().getUniqueId());
+			if(user.inVehicleInventory()) { // checks if the player is in a vehicles inventory
+				user.closeInventory(); // remove the player from the vehicles inventory
+			}
 		}
 	}
 

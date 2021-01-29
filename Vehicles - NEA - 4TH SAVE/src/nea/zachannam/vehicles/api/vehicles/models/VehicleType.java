@@ -11,7 +11,8 @@ import nea.zachannam.vehicles.api.vehicles.models.exceptions.NameOrIdAlreadyInUs
 enum RegisteredVehicle{
 	
 	KART_1(Kart_1.class, 1),
-	RACECAR_1( RaceCar_1.class, 2);
+	RACECAR_1( RaceCar_1.class, 2),
+	LOWRIDER_1( Lowrider_1.class, 3);
 	
 	/**
 	 * Loads all of the registered vehicles (these are the vehicles provided with the API!)

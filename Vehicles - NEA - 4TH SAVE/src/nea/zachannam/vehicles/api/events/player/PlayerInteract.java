@@ -4,14 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Location;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import nea.zachannam.vehicles.api.events.VehicleEvent;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
+import nea.zachannam.vehicles.api.user.User;
 import nea.zachannam.vehicles.api.utils.VehicleMath;
 import nea.zachannam.vehicles.api.vehicles.Vehicle;
 import nea.zachannam.vehicles.api.vehicles.components.ComponentName;
@@ -30,10 +29,12 @@ public class PlayerInteract implements Listener   {
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if(event.getAction() != Action.RIGHT_CLICK_AIR) return; // checks if the play right clicks the block
 		
-		VehicleEvent vehicleEvent = new VehicleEvent((Event) event); // logs event
+		if(!VehiclesAPI.getUserManager().isUser(event.getPlayer().getUniqueId())) return;
 		
-		if(vehicleEvent.getUser().isInDebounce()) return; // checks if the user is currently in a debounce (clicked in the past 3 ticks) and returns in they are
-		vehicleEvent.getUser().addDebounce(); // adds a debounce if they are not
+		User user = VehiclesAPI.getUserManager().getUser(event.getPlayer().getUniqueId());
+		
+		if(user.isInDebounce()) return; // checks if the user is currently in a debounce (clicked in the past 3 ticks) and returns in they are
+		user.addDebounce(); // adds a debounce if they are not
 		
 		if(VehiclesAPI.getVehicleManager().getNumberOfVehicles() <= 0) return; // no point of doing anything else if there are no vehicles in existance, waste of CPU time.
 		

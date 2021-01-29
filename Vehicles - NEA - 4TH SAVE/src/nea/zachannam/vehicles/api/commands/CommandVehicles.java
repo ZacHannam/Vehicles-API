@@ -50,35 +50,10 @@ public class CommandVehicles extends VehicleCommand {
 				return true;
 			}
 			
-			Collection<Vehicle> vehicles = VehiclesAPI.getVehicleManager().getVehicles().values();
-			
-			int numberDestroyed = 0;
-			for(Vehicle vehicle : vehicles) {
-				VehiclesAPI.getVehicleManager().destroyVehicle(vehicle);
-				numberDestroyed++;
-			}
+			int numberDestroyed = VehiclesAPI.getVehicleManager().destroyAllVehicles();
 			
 			Messages.VEHICLES_DESTROYED.sendCommandSender(sender, ImmutableMap.of("%amount%", String.valueOf(numberDestroyed)));
-		} else if(args[0].matches("(?i)destroyall")) {
 			
-			if(!sender.hasPermission(Permissions.COMMAND_VEHICLES_DESTROYALL.getPermission())) {
-				Messages.INVALID_PERMISSION.sendCommandSender(sender);
-				return true;
-			}
-			
-			int numberDestroyed = 0;
-			
-			while(VehiclesAPI.getVehicleManager().getVehicles().size() > 0) {
-				Vehicle v = null;
-				b: for(Vehicle vehicle : VehiclesAPI.getVehicleManager().getVehicles().values()) {
-					v = vehicle;
-					break b;
-				}
-				VehiclesAPI.getVehicleManager().destroyVehicle(v);
-				numberDestroyed++;
-			}
-			
-			Messages.VEHICLES_DESTROYED.sendCommandSender(sender, ImmutableMap.of("%amount%", String.valueOf(numberDestroyed)));
 		} else if(args[0].matches("(?i)destroynear")) {
 			if(args.length < 2) {
 				Messages.VEHICLES_USAGE.sendCommandSender(sender);
@@ -114,6 +89,8 @@ public class CommandVehicles extends VehicleCommand {
 			} catch(NumberFormatException e) {
 				Messages.VEHICLES_USAGE.sendCommandSender(sender);
 			}
+		} else {
+			Messages.VEHICLES_USAGE.sendCommandSender(sender);
 		}
 		
 		return false;
