@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
+import nea.zachannam.vehicles.api.chunk.events.ChunkLoad;
+import nea.zachannam.vehicles.api.chunk.events.ChunkUnload;
 import nea.zachannam.vehicles.api.events.player.EntityDismount;
 import nea.zachannam.vehicles.api.events.player.InventoryClick;
 import nea.zachannam.vehicles.api.events.player.InventoryClose;
@@ -13,8 +15,6 @@ import nea.zachannam.vehicles.api.events.player.PlayerInteractAtEntity;
 import nea.zachannam.vehicles.api.events.player.PlayerJoin;
 import nea.zachannam.vehicles.api.events.player.PlayerQuit;
 import nea.zachannam.vehicles.api.events.protocollib.PlayClientSteerVehicle;
-import nea.zachannam.vehicles.api.events.server.ChunkLoad;
-import nea.zachannam.vehicles.api.events.server.ChunkUnload;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
 
 class ProtocolLibEventManager {

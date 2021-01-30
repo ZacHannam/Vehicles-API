@@ -89,7 +89,7 @@ class Seat_RaceCar_1 extends DriverSeatComponent {
 
 	@Override
 	public Vector OFFSET() {
-		return new Vector(0, -0.25, 0.25);
+		return new Vector(0, -0.25, -0.1);
 	}
 	
 }

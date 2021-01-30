@@ -72,9 +72,7 @@ public class VehiclesAPI extends JavaPlugin {
 		vehiclesDatabase.halt();
 		userManager.halt();
 		commandManager.halt();
-		eventManager.halt();
-		chunkManager.halt();
-		
+		eventManager.halt();		
 		
 	}
 
@@ -87,7 +85,6 @@ public class VehiclesAPI extends JavaPlugin {
 		vehicleManager.halt();
 		vehiclesDatabase.halt();
 		userManager.halt();
-		chunkManager.halt();
 		
 		Messages.reload();
 		chunkManager = new ChunkManager();

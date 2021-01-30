@@ -11,6 +11,7 @@ import org.bukkit.World;
 
 import lombok.Getter;
 import lombok.Setter;
+import nea.zachannam.vehicles.api.chunk.exceptions.ChunkBufferFullException;
 import nea.zachannam.vehicles.api.chunk.exceptions.ChunkIsLoadedException;
 import nea.zachannam.vehicles.api.chunk.exceptions.VehicleHasNoLocationException;
 import nea.zachannam.vehicles.api.main.VehiclesAPI;
@@ -81,7 +82,7 @@ class ChunkID {
 	}
 }
 
-class BufferChunk {
+class ChunkBuffer {
 	
 	@Getter
 	@Setter
@@ -118,15 +119,26 @@ class BufferChunk {
 		this.setUUIDS(newListOfUUIDS);
 	}
 	
-	public BufferChunk(ChunkID paramChunkID, UUID[] paramUUIDS) {
-		this.setChunkID(paramChunkID);
-		this.setUUIDS(paramUUIDS);
+	public ChunkBuffer(ChunkID paramChunkID, UUID[] paramUUIDS) {
+		if(paramChunkID != null) {
+			this.setChunkID(paramChunkID);
+		}
+		if(paramUUIDS != null) {
+			this.setUUIDS(paramUUIDS);
+		}
+	}
+}
+
+class EmptyChunkBuffer extends ChunkBuffer {
+
+	public EmptyChunkBuffer() {
+		super(null, null);
 	}
 }
 
 public class ChunkManager {
 	
-	private static final int MAX_HASH_SIZE = 10000;
+	private static final int MAX_HASH_SIZE = 10000; // the maximum amount of vehicles possible
 	
 	/*
 	 * @Getter
@@ -137,161 +149,362 @@ public class ChunkManager {
 	private HashMap<UUID, ChunkID> vehiclesInChunkInBuffer = new HashMap<UUID, ChunkID>(); // UUID of vehicle, CHUNK ID of the vehicles location
 	
 	@Getter
-	private BufferChunk[] chunkBuffer;
+	private ChunkBuffer[] chunkBuffer; // definite list that contains all of the hashed results
 	
 	/**
-	 * Assume -1 = null;
+	 * Gets the position of a given ChunkID within the Chunk Buffer.
 	 * @param paramChunkID
-	 * @return
+	 * @return the index location of the paramChunkID if the ChunkID is within the buffer otherwise -1 if the chunk cannot be found.
 	 */
-	private int getBufferChunkIndex(ChunkID paramChunkID) {
-			
+	private int getChunkBufferIndex(ChunkID paramChunkID) {
+		
+		// Retrieves the hashed version of the ChunkID
 		int hash = paramChunkID.hash(MAX_HASH_SIZE);
-			
+		
+		// Checks if the the hashed version of the ChunkID is in the chunkBuffer. This is done by checking that the value in the chunkBuffer is not null.
 		while(this.getChunkBuffer()[hash] != null) {
-			if(this.getChunkBuffer()[hash].getChunkID().equals(paramChunkID)) {
+			
+			// Checks if the element at the hash index in the chunkBuffer is equal to the paramChunkID.
+			// Also checks if the element at the position of hash in chunkBuffer is a EmptyChunkBuffer.
+			// If it is and we attempt to get it's chunkID a NullPointerException is thrown.
+			// That also means that the EmptyChunkBuffer check must be completed before checking if the ChunkIDs match.
+			if(!(this.getChunkBuffer()[hash] instanceof EmptyChunkBuffer) && this.getChunkBuffer()[hash].getChunkID().equals(paramChunkID)) {
+				
+				// Returns the hash, as that is the confirmed position of the paramChunkID in the BufferChunk
 				return hash;
+				
+			// The else statement is called if the hash does not match the ChunkID
 			} else {
+				
+				// Adds 1 to the hash and finds the remainder where the dividend is MAX_HASH_SIZE using a modulo operation.
+				// This will make sure that the new hash does not increase past the (MAX_HASH_SIZE - 1)
+				// which is the maximum addressable index in the chunkBuffer
 				hash = (hash + 1) % MAX_HASH_SIZE;
 			}
 		}
 		
+		// -1 is returned as the ChunkID is not within the chunkBuffer. This is a completely ambiguous result as
+		// negative numbers are not ordinal in terms of index locations
 		return -1;
 	}
 	
-	private BufferChunk getBufferChunk(ChunkID paramChunkID) {
-		int index = this.getBufferChunkIndex(paramChunkID);
+	/**
+	 * Retrieves the ChunkBuffer from the Buffer using it's index location.
+	 * @param paramIndex
+	 * @return null if there is no BufferChunk at paramIndex in the buffer otherwise the BufferChunk at paramIndex in the buffer.
+	 */
+	private ChunkBuffer getChunkBuffer(int paramIndex) {
 		
-		if(index == -1) {
-			return null;
-		}
-		return this.getChunkBuffer()[index];
-	}
-	
-	private BufferChunk getBufferChunk(int paramIndex) {
+		// Checks if the item in the ChunkBuffer at the location of paramIndex is null
+		// This means that the ChunkBuffer does not exist
 		if(this.getChunkBuffer()[paramIndex] == null) {
+			
+			// Returns null as the ChunkBuffer does not exist
 			return null;
 		}
+		
+		// As a ChunkBuffer exists in the paramIndex location, the ChunkBuffer in that slot is returned.
 		return this.getChunkBuffer()[paramIndex];
 	}
 	
-	private void removeBufferChunk(ChunkID paramChunkID) {
-		int index = this.getBufferChunkIndex(paramChunkID);
+	/**
+	 * Retrieves the ChunkBuffer from the Buffer using it's ChunkID.
+	 * @param paramIndex
+	 * @return null if there is no BufferChunk available for the paramChunkID in the buffer otherwise the BufferChunk corresponding to the paramChunkID.
+	 */
+	private ChunkBuffer getChunkBuffer(ChunkID paramChunkID) {
+		// Gets the index using the getChunkBufferIndex method of the paramChunkID.
+		// This may return -1 as a negative result, therefore it must check for it.
+		int index = this.getChunkBufferIndex(paramChunkID); 
 		
+		// Checks if index is -1 as if it is, then no ChunkBuffer is available.
+		if(index == -1) {
+			
+			// Returns -1 as the ChunkBuffer does not exist for paramChunkID
+			return null;
+		}
+		
+		// If the index is not -1 then it will return the value at position index in the chunkBuffer
+		return this.getChunkBuffer()[index];
+	}
+	
+	/**
+	 * Removes a ChunkBuffer from the chunkBuffer using it's ChunkID
+	 * @param paramChunkID
+	 */
+	private void removeChunkBuffer(ChunkID paramChunkID) { 
+		// Gets the index using the getChunkBufferIndex method of the paramChunkID.
+		// This may return -1 as a negative result, therefore it must check for it.
+		int index = this.getChunkBufferIndex(paramChunkID);
+		
+		// Checks if index is -1 as if it is, then no ChunkBuffer is available.
 		if(index != -1) {
-			this.getChunkBuffer()[index] = null;
+			// Sets the chunkBuffer[index] to an EmptyChunkBuffer. Setting it to an EmptyChunkBuffer means that it is not null. This is vital for other hashes to still work.
+			this.getChunkBuffer()[index] = new EmptyChunkBuffer();
 		}
 	}
 	
-	private void addBufferChunk(BufferChunk paramBufferChunk) {
-		int hash = paramBufferChunk.getChunkID().hash(MAX_HASH_SIZE);
+	/**
+	 * Adds a ChunkBuffer to the bufferChunk list.
+	 * @param paramBufferChunk
+	 */
+	private void addChunkBuffer(ChunkBuffer paramChunkBuffer) {
 		
-		while(this.getChunkBuffer()[hash] != null) {
+		// Sets hash to the hash of paramChunkBuffer's ChunkID
+		int hash = paramChunkBuffer.getChunkID().hash(MAX_HASH_SIZE);
+		
+		// The iteration value records the total number of times the while loop is repeated
+		// Hopefully it never comes close to the MAX_HASH_SIZE.
+		int iteration = 0;
+		
+		// The while loop checks firstly that the element at the location of hash in chunkBuffer is not null and secondly that it is not an EmptyChunkBuffer
+		// If these two expressions are met then the indefinite while loop starts.
+		while(this.getChunkBuffer()[hash] != null && !(this.getChunkBuffer()[hash] instanceof EmptyChunkBuffer)) {
+			
+			 // Checks if the iteration is larger than the MAX_HASH_SIZE this means that the list chunkBuffer list is completely full.
+			if(iteration >= MAX_HASH_SIZE) {
+				// Throws a new exception and breaks out of the loop if the chunkBuffer is completely full.
+				throw new RuntimeException(new ChunkBufferFullException()); 
+			}
+			
+			// Adds 1 to the hash and finds the remainder where the dividend is MAX_HASH_SIZE using a modulo operation.
+			// This will make sure that the new hash does not increase past the (MAX_HASH_SIZE - 1)
+			// which is the maximum addressable index in the chunkBuffer
 			hash = (hash + 1) % MAX_HASH_SIZE;
+			
+			 // Adds 1 to the iteration
+			iteration++;
 		}
 		
-		this.getChunkBuffer()[hash] = paramBufferChunk;
+		// sets the BufferChunk into the chunkBuffer[hash] as this is an empty spot.
+		this.getChunkBuffer()[hash] = paramChunkBuffer;
 	}
 	
+	/**
+	 * Adds a vehicle to the chunk buffer
+	 * @param paramVehicle
+	 */
 	public void addVehicleToBuffer(Vehicle paramVehicle) {
-		if(paramVehicle.getLocation() == null) { // checks that the vehicle has a location
-			throw new RuntimeException(new VehicleHasNoLocationException()); // no location present throws an error
-		}
-		if(this.isChunkLoaded(paramVehicle.getLocation().toLocation())) { // checks if the chunk is loaded that the vehicle is in
-			throw new RuntimeException(new ChunkIsLoadedException()); // throws a new exception as the chunk is loaded, and therefore will spawn without a problem
+		// Must check if the vehicle's location is null. If the vehicle's location
+		// is null then it will not be in a chunk, hence can not be added to the buffer.
+		if(paramVehicle.getLocation() == null) {
+			
+			// Throws a VehicleHasNoLocationException as the vehicle cannot be added to the buffer since it has no location
+			throw new RuntimeException(new VehicleHasNoLocationException());
 		}
 		
+		// Checks if the chunk that the vehicle is in, is loaded. If it is loaded then it will not be able to be added to the buffer
+		if(this.isChunkLoaded(paramVehicle.getLocation().toLocation())) {
+			
+			//Throws a ChunkIsLoadedException as the Chunk is loaded
+			throw new RuntimeException(new ChunkIsLoadedException());
+		}
+		
+		// Gets the ChunkID of the Chunk that the vehicle is currently in
 		ChunkID chunkID = ChunkID.getChunkID(paramVehicle.getLocation().toLocation());
 		
-		int index = this.getBufferChunkIndex(chunkID);
+		// Gets the index of the ChunkID is the chunkBuffer
+		// This will return -1 if the chunk is not in the chunkBuffer.
+		// However, if the ChunkID is in the chunkBuffer the 
+		int index = this.getChunkBufferIndex(chunkID);
 		
+		// Checks if the index equals -1
+		// If the index is -1 then the chunk is not in the chunkBuffer
 		if(index == -1) {
-			this.addBufferChunk(new BufferChunk(chunkID, new UUID[] {paramVehicle.getUuid()}));
+			
+			// Adds a new ChunkBuffer to chunkBuffer using a new UUID list containing just the vehicle, and the ChunkID of the chunk that the vehicle is currently in.
+			this.addChunkBuffer(new ChunkBuffer(chunkID, new UUID[] {paramVehicle.getUuid()}));
+			
+		// There is already a ChunkBuffer for the chunk, in the chunkBuffer list.
 		} else {
-			BufferChunk bufferChunk = this.getBufferChunk(index);
-			bufferChunk.addVehicleUUID(paramVehicle.getUuid());
-			chunkID = bufferChunk.getChunkID();
+			
+			// Gets the ChunkBuffer from the chunkBuffer list at the index found.
+			ChunkBuffer chunkBuffer = this.getChunkBuffer(index);
+			
+			// Adds the vehicle's UUID to the ChunkBuffer
+			chunkBuffer.addVehicleUUID(paramVehicle.getUuid());
+			
+			// Sets the chunkID variable to that of the ChunkBuffers. This is to reduce memory usage
+			// if there are thousands of vehicles in the VehiclesInChunkInBuffer map, as the ChunkIDs are identical.
+			chunkID = chunkBuffer.getChunkID();
 		}
 		
+		// Puts the vehicle's UUID and the ChunkID into the VehiclesInChunkInBuffer map.
 		this.getVehiclesInChunkInBuffer().put(paramVehicle.getUuid(), chunkID);
 	}
 	
+	/**
+	 * Used to remove a vehicle from the ChunkBuffer
+	 * @param paramVehicle
+	 */
 	public void removeVehicleFromBuffer(Vehicle paramVehicle) {
+		
+		 // Checks if the paramVehicle's UUID is in the vehiclesInChunkInBuffer. If it is not then it will return.
 		if(!this.getVehiclesInChunkInBuffer().containsKey(paramVehicle.getUuid())) return;
 		
+		// Gets the ChunkID of the Chunk that the vehicle is currently in, from the vehiclesInChunkInBuffer map.
 		ChunkID chunkID = this.getVehiclesInChunkInBuffer().get(paramVehicle.getUuid());
 		
-		BufferChunk bufferChunk = this.getBufferChunk(chunkID);
+		// Retrieves the chunkBuffer from the chunkBuffer list from the chunkID
+		ChunkBuffer chunkBuffer = this.getChunkBuffer(chunkID); 
 		
-		if(bufferChunk.getUUIDS() != null && bufferChunk.getUUIDS().length == 1){
-			this.removeBufferChunk(chunkID);
-		} else {
-			bufferChunk.removeVehicleUUID(paramVehicle.getUuid());
+		// Checks if the UUID list in chunkBuffer is not null
+		// This is defensive programming as it should never be null.
+		if(chunkBuffer.getUUIDS() != null) {
+			
+			// Checks if there is a single UUID in the UUID list within the ChunkBuffer. 
+			// If there is only one item, the ChunkBuffer can be replaced with an EmptyChunkBuffer.
+			if(chunkBuffer.getUUIDS().length == 1){
+				
+				// removes the ChunkBuffer from the chunkBuffer list using its chunkID.
+				this.removeChunkBuffer(chunkID); 
+				
+			// If there are multiple paramVehicle UUIDs in the ChunkBuffer then only a single UUID should be removed.
+			} else {
+				
+				// Removes the paramVehicle's UUID from the ChunkBuffer UUID list.
+				chunkBuffer.removeVehicleUUID(paramVehicle.getUuid());
+			}
 		}
 		
+		// Removes the paramVehicle and its corresponding ChunkID from the vehiclesInChunkInBuffer
 		this.getVehiclesInChunkInBuffer().remove(paramVehicle.getUuid());
 	}
 	
-	public void loadChunk(Chunk paramChunk) {
+	/**
+	 * Shows all of the vehicles within paramChunk
+	 * @param paramChunk
+	 */
+	protected void loadChunk(Chunk paramChunk) {
 	
+		// Gets the chunkID for the paramChunk.
 		ChunkID chunkID = ChunkID.getChunkID(paramChunk);
-		int index = this.getBufferChunkIndex(chunkID);
 		
+		// Gets the index of the chunkID within the chunkBuffer list.
+		// Value may be -1
+		int index = this.getChunkBufferIndex(chunkID);
+		
+		// Checks if index is -1, if the value is -1 then the chunk is not in the buffer.
+		// This means there are no vehicles to show within the chunk, therefore it can return.
 		if(index == -1) return;
 		
+		// Iterates through the UUIDs of vehicles in the ChunkBuffer from the chunkBuffer[index]
 		for(UUID uuid : this.getChunkBuffer()[index].getUUIDS()) {
+			
+			// Retrieves the vehicle object from the Vehicle Manager from the vehicle's UUID
 			Vehicle vehicle = VehiclesAPI.getVehicleManager().getVehicleFromUUID(uuid);
+			
+			// Checks if the vehicle is spawned. This is defensive programming as the vehicle
+			// should be removed from the buffer when it is despawned.
 			if(vehicle.isSpawned()) {
+				
+				// If the vehicle is spawned, which it should always be if it is still in the buffer
+				// it is shown.
 				vehicle.show();
 			}
+			
+			// The vehicle is removed from the vehiclesInChunkInBuffer as the vehicle is no longer
+			// in the buffer as it is now shown.
 			this.getVehiclesInChunkInBuffer().remove(uuid);
 		}
-		this.removeBufferChunk(chunkID);
+		
+		// removes the chunk from the chunkBuffer, as all of the vehicles in the chunk have now been shown.
+		this.removeChunkBuffer(chunkID);
 	}
 	
-	public void unloadChunk(Chunk paramChunk) {
+	/**
+	 * Hides all of the vehicles within paramChunk
+	 * @param paramChunk
+	 */
+	protected void unloadChunk(Chunk paramChunk) {
 		
-		ChunkID chunkID = ChunkID.getChunkID(paramChunk); // gets the chunk id for the chunk that is being unloaded
+		// Checks if there are any vehicles on the server, if there are none then there 
+		// is no need to complete anything else in this method so it returns.
+		if(VehiclesAPI.getVehicleManager().getNumberOfVehicles() == 0) return;
 		
-		List<UUID> vehiclesInChunk = new ArrayList<UUID>(); // dynamic arraylist to store all of the vehicles uuids that are inside of the chunk that is being unloaded
+		// Gets the chunkID for the paramChunk.
+		ChunkID chunkID = ChunkID.getChunkID(paramChunk);
 		
-		for(Vehicle vehicle : VehiclesAPI.getVehicleManager().getVehicles().values()) { // iterates through all of the vehicles on the server
-			if(vehicle.isSpawned()) { // checks if the vehicle is spawned / if it is not spawned then it does not matter if the chunk is active or not
-				if(vehicle.getLocation() != null && ChunkID.getChunkID(vehicle.getLocation().toLocation()).equals(chunkID)) { // cannot check chunk directly as it loads the chunk, then unloads the chunk causing a stackoverflow error
-					vehicle.hide(); // as the vehicle is in the chunk, the vehicle is hidden
-					vehiclesInChunk.add(vehicle.getUuid()); // adds vehicle to the list of vehicles in the chunk
-					this.getVehiclesInChunkInBuffer().put(vehicle.getUuid(), chunkID); // adds the vehicle to the chunk buffer
+		// Dynamic list that is used to store all of the vehicles that are being despawned.
+		List<UUID> vehiclesInChunk = new ArrayList<UUID>();
+		
+		// Iterates through all of the vehicles on the server.
+		for(Vehicle vehicle : VehiclesAPI.getVehicleManager().getVehicles().values()) {
+			
+			// Checks if the vehicle is spawned, if the vehicle is not spawned then it
+			// will already be hidden and will not need to be in the ChunkBuffer
+			if(vehicle.isSpawned()) {
+				
+				// Checks that the vehicle has a location and that the ChunkIDs match
+				// it checks that the location is not null, as if it is null, then getting the location will cause an error
+				// The location returned by the vehicle is in the form of a VehicleLocation therefore it is necessary to turn it to a Spigot location
+				// Uses a custom equals to check for equivalence instead of exact same object
+				if(vehicle.getLocation() != null && ChunkID.getChunkID(vehicle.getLocation().toLocation()).equals(chunkID)) {
+					
+					// Hides the vehicle as the chunk is being unloaded
+					vehicle.hide();
+					
+					// Adds vehicle to the list of vehicles in the chunk which is necessary for creating a list of UUIDS for the buffer chunk
+					vehiclesInChunk.add(vehicle.getUuid());
+					
+					// Puts the vehicle's UUID and the chunkID into the vehiclesInChunkInBuffer
+					this.getVehiclesInChunkInBuffer().put(vehicle.getUuid(), chunkID);
 				}
 			}
 		}
 		
-		UUID[] uuids = new UUID[vehiclesInChunk.size()]; // creates a new list of UUIDs which is to contain all of the vehicles inside of the vehicles in chunk
-		for(int index = 0; index < vehiclesInChunk.size(); index++) { // 0 -> len(vehiclesInChunk)
-			uuids[index] = vehiclesInChunk.get(index); // puts the uuid of vehicle in vehiclesInChunk into the uuids
+		// If there are no vehicles in the vehiclesInChunkArray then there is no need to have a BufferChunk
+		// returns if there are no vehicles in the chunk instead of creating a BufferChunk
+		if(vehiclesInChunk.size() == 0) return;
+		
+		// As no more UUIDS can be added to the vehiclesInChunk, a new UUID list is created with a definite size of vehiclesInChunk
+		// All of the elements from vehiclesInChunk will be moved to the new uuids variable.
+		UUID[] uuids = new UUID[vehiclesInChunk.size()];
+		
+		// For loop from 0 to the length of the vehiclesInChunk.
+		for(int index = 0; index < vehiclesInChunk.size(); index++) {
+			
+			// moves items from vehiclesInChunk into uuids.
+			uuids[index] = vehiclesInChunk.get(index);
 			
 		}
 		
-		this.addBufferChunk(new BufferChunk(chunkID, uuids));
-		
+		// Adds a new ChunkBuffer where ChunkID = chunkId and UUIDS = uuids.
+		this.addChunkBuffer(new ChunkBuffer(chunkID, uuids));	
 	}
 	
+	/**
+	 * Checks if a chunk is loaded, without loading the chunk.
+	 * @param paramLocation
+	 * @return returns a boolean value of if the chunk is currently loaded or not
+	 */
 	public boolean isChunkLoaded(Location paramLocation) {
-		ChunkID locationChunkID = ChunkID.getChunkID(paramLocation); // gets the chunk id at paramLocation
-		Chunk[] chunks = paramLocation.getWorld().getLoadedChunks(); // cannot check if the chunk is loaded directly as it will always return true as the world::getChunkAt and Chunk::isLoaded loads the chunk
-		for(Chunk chunk : chunks) { // runs through each chunk in the loaded chunks
-			if(locationChunkID.equals(ChunkID.getChunkID(chunk))) { // checks if the location we are checking is inside of an active chunk
+		
+		// Gets the chunkID of the location
+		ChunkID chunkID = ChunkID.getChunkID(paramLocation);
+		
+		// Retrieves all of the loaded chunks on the server. Unfortunately, a binary search will not work
+		// as the list is not ordered, and all loaded chunks are added onto the end.
+		Chunk[] chunks = paramLocation.getWorld().getLoadedChunks();
+		
+		// Iterates through the loaded chunks on the server and performs a linear search
+		for(Chunk chunk : chunks) {
+			
+			// checks if the chunkID from the chunk in the iteration is equal to the chunkID
+			if(chunkID.equals(ChunkID.getChunkID(chunk))) {
+				
+				// if they are equal then the chunkID is a loaded chunk therefore returns true
 				return true;
 			}
 		}
-		return false; // chunk is not loaded
+		
+		// After the iteration, if the boolean has not returned true then the chunk has not been loaded
+		return false;
 	}
 	
 	
 	
 	public ChunkManager() {
-		chunkBuffer = new BufferChunk[MAX_HASH_SIZE];
-	}
-	
-	public void halt() {
+		chunkBuffer = new ChunkBuffer[MAX_HASH_SIZE];
 	}
 }

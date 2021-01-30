@@ -1,4 +1,4 @@
-package nea.zachannam.vehicles.api.events.server;
+package nea.zachannam.vehicles.api.chunk.events;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
