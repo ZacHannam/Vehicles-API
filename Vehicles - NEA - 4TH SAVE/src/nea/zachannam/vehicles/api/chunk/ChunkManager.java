@@ -502,8 +502,6 @@ public class ChunkManager {
 		return false;
 	}
 	
-	
-	
 	public ChunkManager() {
 		chunkBuffer = new ChunkBuffer[MAX_HASH_SIZE];
 	}
