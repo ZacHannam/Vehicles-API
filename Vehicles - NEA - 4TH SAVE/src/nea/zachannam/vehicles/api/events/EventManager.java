@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
+import lombok.Getter;
 import nea.zachannam.vehicles.api.chunk.events.ChunkLoad;
 import nea.zachannam.vehicles.api.chunk.events.ChunkUnload;
 import nea.zachannam.vehicles.api.events.player.EntityDismount;
@@ -26,11 +27,8 @@ class ProtocolLibEventManager {
 
 public class EventManager {
 
+	@Getter
 	private ProtocolLibEventManager protocolLibEventManager;
-	
-	public ProtocolLibEventManager getProtocolLibEventManager() {
-		return protocolLibEventManager;
-	}
 	
 	public EventManager() {
 		
@@ -49,9 +47,5 @@ public class EventManager {
 		pluginManager.registerEvents(new InventoryClick(), plugin);
 		pluginManager.registerEvents(new InventoryClose(), plugin);
 		pluginManager.registerEvents(new PlayerInteractAtEntity(), plugin);
-	}
-
-	public void halt() {
-		
 	}
 }

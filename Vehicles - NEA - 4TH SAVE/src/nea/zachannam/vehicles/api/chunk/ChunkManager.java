@@ -19,8 +19,24 @@ import nea.zachannam.vehicles.api.vehicles.Vehicle;
 
 class ChunkID {
 	
+	@Getter
+	@Setter
+	// world value of the Chunk
+	private World world;
+	
+	@Getter
+	@Setter
+	// X value of the Chunk
+	private int x;
+	
+	@Getter
+	@Setter
+	// Z value of the Chunk
+	private int z;
+	
 	/**
-	 * Used to get the chunkID from a location
+	 * Used to get the chunkID from a location#
+	 * Uses X and Z values to find the chunk
 	 * @param paramChunk
 	 * @return
 	 */
@@ -30,6 +46,7 @@ class ChunkID {
 	
 	/**
 	 * Used to get the chunkID from a chunk
+	 * Uses the chunk X and Z to get a chunkID
 	 * @param paramChunk
 	 * @return
 	 */
@@ -37,48 +54,50 @@ class ChunkID {
 		return new ChunkID(paramChunk.getWorld(), paramChunk.getX(), paramChunk.getZ());
 	}
 	
+	/**
+	 * Compares X, Z and World values to paramChunkID
+	 * @param paramChunkID
+	 * @return
+	 */
 	public boolean equals(ChunkID paramChunkID) {
 		return (this.getX() == paramChunkID.getX()) && (this.getZ() == paramChunkID.getZ()) && (this.getWorld() == paramChunkID.getWorld());
 	}
 	
+	/**
+	 * Hashes the ChunkID for a value between 0 and paramMaxHashSize using the modulo function
+	 * @param paramMaxHashSize
+	 * @return
+	 */
 	public int hash(double paramMaxHashSize) {
-		int concurrentHash = 1;
+		int concurrentHash = 1; // stores value of the current hash, cannot be 0 as multiplying first
 		
+		// runs through each letter in the world's name and multiplies the ordinal value of each character by the concurrent hash
+		// this creates a large number which can be very random
 		for(char c : this.getWorld().getName().toCharArray()) {
 			concurrentHash *= (int) c;
 		}
 		
+		// Check if x is less than 0
 		if(this.getX() < 0) {
-			concurrentHash *= (Math.abs(this.getX()) + concurrentHash);
-		} else if(this.getX() > 0) {
-			concurrentHash *= Math.abs(this.getX());
+			concurrentHash *= (Math.abs(this.getX()) + concurrentHash); // multiply the hash by the absolute value of x + concurrentHash
+		} else if(this.getX() > 0) { // check if x is larger than 0
+			concurrentHash *= Math.abs(this.getX()); // multiply the hash by the absolute value of x
 		}
 		
+		// Check if z is less than 0
 		if(this.getZ() < 0) {
-			concurrentHash *= (Math.abs(this.getZ()) + concurrentHash);
-		} else if(this.getX() > 0) {
-			concurrentHash *= Math.abs(this.getZ());
+			concurrentHash *= (Math.abs(this.getZ()) + concurrentHash); // multiply the hash by the absolute value of z + concurrentHash
+		} else if(this.getX() > 0) { // Check if z is greater than 0
+			concurrentHash *= Math.abs(this.getZ()); // multiply the hash by the absolute value of z
 		}
 		
-		return (int) (Math.abs(concurrentHash) % paramMaxHashSize);
+		return (int) (Math.abs(concurrentHash) % paramMaxHashSize); // run modulo function on the hash to produce a number with a max size
 	}
 	
-	@Getter
-	@Setter
-	private World world;
-	
-	@Getter
-	@Setter
-	private int x;
-	
-	@Getter
-	@Setter
-	private int z;
-	
 	public ChunkID (World paramWorld, int paramChunkX, int paramChunkZ) {
-		this.setWorld(paramWorld);
-		this.setX(paramChunkX);
-		this.setZ(paramChunkZ);
+		this.setWorld(paramWorld); // set world to paramWorld
+		this.setX(paramChunkX); // set x to paramChunkX
+		this.setZ(paramChunkZ); // set z to paramChunkZ
 	}
 }
 
@@ -86,10 +105,12 @@ class ChunkBuffer {
 	
 	@Getter
 	@Setter
+	// ChunkID contains the chunkID for the chunk buffer
 	private ChunkID chunkID;
 	
 	@Getter
 	@Setter
+	// contains a list of UUIDs of vehicles in the chunk
 	private UUID[] UUIDS;
 	
 	public void addVehicleUUID(UUID paramUUID) {
@@ -375,7 +396,7 @@ public class ChunkManager {
 	 * Shows all of the vehicles within paramChunk
 	 * @param paramChunk
 	 */
-	protected void loadChunk(Chunk paramChunk) {
+	public void loadChunk(Chunk paramChunk) {
 	
 		// Gets the chunkID for the paramChunk.
 		ChunkID chunkID = ChunkID.getChunkID(paramChunk);
@@ -416,7 +437,7 @@ public class ChunkManager {
 	 * Hides all of the vehicles within paramChunk
 	 * @param paramChunk
 	 */
-	protected void unloadChunk(Chunk paramChunk) {
+	public void unloadChunk(Chunk paramChunk) {
 		
 		// Checks if there are any vehicles on the server, if there are none then there 
 		// is no need to complete anything else in this method so it returns.

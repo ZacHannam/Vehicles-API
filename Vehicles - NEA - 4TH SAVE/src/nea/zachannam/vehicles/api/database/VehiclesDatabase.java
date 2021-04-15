@@ -74,9 +74,5 @@ public class VehiclesDatabase extends Database{
 		// TODO Auto-generated method stub
 		this.executeUpdate("DELETE FROM " + TABLE_NAME + " WHERE vehicleUUID == '" + paramUUID.toString() + "';");
 	}
-	
-	public void halt() {
-		super.halt();
-	}
 
 }

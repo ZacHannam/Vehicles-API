@@ -11,40 +11,57 @@ import java.util.HashMap;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Database {
 	
+	// Contains a list of all of the loaded databases so there is no loading the same database.
+	@Getter
 	private static HashMap<String, Database> databases = new HashMap<String, Database>();
+	
+	// The main class
+	@Getter
 	private final JavaPlugin plugin = JavaPlugin.getProvidingPlugin(this.getClass());
+	
+	@Getter
+	@Setter
+	private String fileName;
+	
+	// connection to the database
+	@Getter
+	@Setter
 	private Connection connection;
 	
+	/**
+	 * Returns the database that is associated to the 
+	 * 
+	 * @param paramName
+	 * @return
+	 */
 	public static Database getDatabase(String paramName) {
-		if(databases.containsKey(paramName)) {
-			return databases.get(paramName);
+		if(getDatabases().containsKey(paramName)) {
+			return getDatabases().get(paramName);
 		}
 		return new Database(paramName);
 	}
 	
-	public JavaPlugin getInstance() {
-		if (plugin == null)
-			try {
-				throw new Exception();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		return plugin;
-	}
-	
+	/**
+	 * Returns the datapath as a string
+	 * @return
+	 */
 	public String getDataFolderPath() {
 		File dir = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "));
-		File d = new File(dir.getParentFile().getPath(), getInstance().getName());
+		File d = new File(dir.getParentFile().getPath(), getPlugin().getName());
 		
 		return d.getPath();
 	}
 	
-	public Connection getConnection() {
-		return this.connection;
-	}
-	
+	/**
+	 * Creates the connection to the database
+	 * @param paramName
+	 * @return
+	 */
 	private Connection getConnection(String paramName) {
 		
 		try {
@@ -53,9 +70,7 @@ public class Database {
 			
 			Class.forName("org.sqlite.JDBC");
 			
-			Connection conn = DriverManager.getConnection(url);
-			
-			return conn;
+			return DriverManager.getConnection(url);
 			
 		} catch(Exception e) {
 		
@@ -66,28 +81,26 @@ public class Database {
         
 	}
 	
-	public ResultSet executeQuery(String instruction) {
+	public ResultSet executeQuery(String paramInstruction) {
 		Statement statement;
 		try {
 			statement = this.getConnection().createStatement();
-			ResultSet result = statement.executeQuery(instruction);
+			ResultSet result = statement.executeQuery(paramInstruction);
 			return result;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 		
 	}
 	
-	public void executeUpdate(String instruction) {
+	public void executeUpdate(String paramInstruction) {
 		Statement statement;
 		try {
 			statement = this.getConnection().createStatement();
-			statement.executeUpdate(instruction);
+			statement.executeUpdate(paramInstruction);
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -99,25 +112,24 @@ public class Database {
 			meta = this.getConnection().getMetaData();
 			return meta;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return null;
 	}
 	
-	
 	public Database(String paramName) {
-		databases.put(paramName, this);
+		getDatabases().put(paramName, this);
 		
-		this.connection = getConnection(paramName);
+		this.setConnection(getConnection(paramName));
 	}
 	
 	public void halt() {
 		try {
 			this.connection.close();
+			getDatabases().remove(this.getFileName());
+			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
