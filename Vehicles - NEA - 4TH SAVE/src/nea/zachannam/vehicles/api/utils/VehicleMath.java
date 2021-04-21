@@ -163,6 +163,10 @@ public final class VehicleMath {
 			return false; // returns false as the location is in not in the same world as the vehicle
 		}
 		
+		if(!paramVehicle.hasComponent(ComponentName.FRAME.getName())) { // check if the vehicle has a frame component
+			return false; // if the vehicle has no frame component return false
+		}
+		
 		Frame frame = (Frame) paramVehicle.getFirstComponentByType(ComponentName.FRAME.getName());
 		
 		if(paramLocation.getY() > paramVehicle.getLocation().getY() + frame.getHeight() 

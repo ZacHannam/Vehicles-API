@@ -131,7 +131,9 @@ public class CommandSummonVehicle extends VehicleCommand {
 		// performs the spawn method on the vehicle
 		vehicle.spawn(VehicleLocation.fromLocation(spawnLocation));
 		
-		VehiclesAPI.getUserManager().getUser(((Player) sender).getUniqueId()).quickSetDrive(vehicle); // makes the player drive the vehicle
+		if(sender instanceof Player) { // Checks if sender is a player
+			VehiclesAPI.getUserManager().getUser(((Player) sender).getUniqueId()).quickSetDrive(vehicle); // makes the player drive the vehicle
+		}
 		
 		// sends the sender a message confirming their action
 		Messages.SUCCESSFULLY_SPAWNED_VEHICLE.sendCommandSender(sender);

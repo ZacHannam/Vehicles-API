@@ -4,7 +4,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import lombok.Getter;
-import lombok.Setter;
 import nea.zachannam.vehicles.api.chunk.ChunkManager;
 import nea.zachannam.vehicles.api.commands.CommandManager;
 import nea.zachannam.vehicles.api.database.VehiclesDatabase;

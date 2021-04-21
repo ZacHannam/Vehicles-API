@@ -113,8 +113,12 @@ class ChunkBuffer {
 	// contains a list of UUIDs of vehicles in the chunk
 	private UUID[] UUIDS;
 	
+	/**
+	 * Used to add a vehicle to the ChunkBuffer
+	 * @param paramUUID
+	 */
 	public void addVehicleUUID(UUID paramUUID) {
-		UUID[] newListOfUUIDS = new UUID[this.getUUIDS().length + 1]; // creates a new list of UUIDS that will be 1 larger than the listOfUUIDS
+		UUID[] newListOfUUIDS = new UUID[this.getUUIDS().length + 1]; // creates a new list of unique IDs that will be 1 larger than the listOfUUIDS
 		
 		newListOfUUIDS[0] = paramUUID; // adds the new uuid of the vehicle being added to the newListOfUUIDS
 		for(int index = 0; index < this.getUUIDS().length; index++) { // runs from 0 to the length of the old list of UUIDS
@@ -124,6 +128,10 @@ class ChunkBuffer {
 		this.setUUIDS(newListOfUUIDS);
 	}
 	
+	/**
+	 * Used to remove a vehicle from the ChunkBuffer
+	 * @param paramUUID
+	 */
 	public void removeVehicleUUID(UUID paramUUID) {
 		if(this.getUUIDS().length == 1) this.setUUIDS(new UUID[0]);
 		
