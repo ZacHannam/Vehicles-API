@@ -55,6 +55,12 @@ public class CommandVehicles extends VehicleCommand {
 			Messages.VEHICLES_DESTROYED.sendCommandSender(sender, ImmutableMap.of("%amount%", String.valueOf(numberDestroyed)));
 			
 		} else if(args[0].matches("(?i)destroynear")) {
+			
+			if(!sender.hasPermission(Permissions.COMMAND_VEHICLES_DESTROYNEAR.getPermission())) {
+				Messages.INVALID_PERMISSION.sendCommandSender(sender);
+				return true;
+			}
+			
 			if(args.length < 2) {
 				Messages.VEHICLES_USAGE.sendCommandSender(sender);
 				return true;
